@@ -3,124 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Selector de Emociones</title>
+    <title>Centro de Bienestar Emocional</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
+    {% if show_welcome %}
+    <meta http-equiv="refresh" content="3;url=/?show=main">
+    {% endif %}
 </head>
-<body class="min-h-screen bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center p-4">
+<body class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 overflow-hidden">
     
-    <div class="w-full max-w-2xl">
-        <!-- Título principal -->
-        <h1 class="text-4xl md:text-5xl font-bold text-white text-center mb-12">
-            ¿Cómo te sientes hoy?
-        </h1>
-        
-        <!-- Contenedor de botones -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            
-            <!-- Botón Enojo -->
-            <button onclick="selectEmotion('enojo')" 
-                    class="group bg-red-500 hover:bg-red-600 active:bg-red-700 
-                           text-white rounded-2xl p-8 transition-all duration-300 
-                           transform hover:scale-105 hover:shadow-xl hover:shadow-red-500/30
-                           focus:outline-none focus:ring-4 focus:ring-red-400">
-                <div class="text-5xl mb-3 group-hover:animate-bounce">😠</div>
-                <div class="text-xl font-bold">Enojo</div>
-            </button>
-            
-            <!-- Botón Tristeza -->
-            <button onclick="selectEmotion('tristeza')" 
-                    class="group bg-blue-500 hover:bg-blue-600 active:bg-blue-700 
-                           text-white rounded-2xl p-8 transition-all duration-300 
-                           transform hover:scale-105 hover:shadow-xl hover:shadow-blue-500/30
-                           focus:outline-none focus:ring-4 focus:ring-blue-400">
-                <div class="text-5xl mb-3 group-hover:animate-bounce">😢</div>
-                <div class="text-xl font-bold">Tristeza</div>
-            </button>
-            
-            <!-- Botón Coraje -->
-            <button onclick="selectEmotion('coraje')" 
-                    class="group bg-purple-500 hover:bg-purple-600 active:bg-purple-700 
-                           text-white rounded-2xl p-8 transition-all duration-300 
-                           transform hover:scale-105 hover:shadow-xl hover:shadow-purple-500/30
-                           focus:outline-none focus:ring-4 focus:ring-purple-400">
-                <div class="text-5xl mb-3 group-hover:animate-bounce">😤</div>
-                <div class="text-xl font-bold">Coraje</div>
-            </button>
-            
-        </div>
-        
-        <!-- Panel de resultado -->
-        <div id="result-panel" class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 text-center transition-all duration-500">
-            <h2 id="result-title" class="text-2xl font-bold text-white mb-4">
-                Selecciona una emoción
-            </h2>
-            <p id="result-message" class="text-gray-300 text-lg">
-                Haz clic en uno de los botones de arriba para ver un mensaje
+    {% if show_welcome %}
+    <!-- Mensaje de Bienvenida -->
+    <div id="welcome-screen" class="fixed inset-0 flex items-center justify-center z-50">
+        <div class="text-center space-y-6 px-4">
+            <h1 class="text-5xl md:text-7xl font-bold text-white welcome-text">
+                Bienvenido
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-300 welcome-subtext">
+                Tu espacio de bienestar emocional
             </p>
+            <div class="loading-dots flex justify-center space-x-2 mt-8">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
         </div>
-        
     </div>
+    {% else %}
+    <!-- Contenedor Principal -->
+    <div id="main-content" class="min-h-screen flex items-center justify-center p-4">
+        <div class="max-w-6xl w-full">
+            
+            <!-- Título -->
+            <div class="text-center mb-16 fade-in">
+                <h2 class="text-4xl md:text-5xl font-bold text-white mb-4">
+                    ¿Cómo te sientes hoy?
+                </h2>
+                <p class="text-lg text-gray-300">
+                    Selecciona una opción para recibir apoyo personalizado
+                </p>
+            </div>
 
-    <script>
-        // Datos de las emociones
-        const emotionsData = {
-            enojo: {
-                emoji: "😠",
-                title: "Enojo",
-                color: "text-red-400",
-                bgColor: "bg-red-500/20",
-                borderColor: "border-red-500",
-                message: "El enojo es una emoción natural. Respira profundo y cuenta hasta 10. Recuerda que tienes el control de tus reacciones."
-            },
-            tristeza: {
-                emoji: "😢",
-                title: "Tristeza",
-                color: "text-blue-400",
-                bgColor: "bg-blue-500/20",
-                borderColor: "border-blue-500",
-                message: "Está bien sentirse triste a veces. Permítete sentir esta emoción, pero recuerda que los momentos difíciles son temporales."
-            },
-            coraje: {
-                emoji: "😤",
-                title: "Coraje",
-                color: "text-purple-400",
-                bgColor: "bg-purple-500/20",
-                borderColor: "border-purple-500",
-                message: "El coraje puede ser una fuerza motivadora. Canaliza esa energía de manera positiva hacia tus metas."
-            }
-        };
+            <!-- Contenedor de Botones -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+                
+                <!-- Botón Ansiedad -->
+                <div class="button-card fade-in" style="animation-delay: 0.2s">
+                    <div class="emotion-button group relative w-full h-80 rounded-3xl overflow-hidden transition-all duration-500 hover:scale-105 hover:shadow-2xl cursor-pointer">
+                        <div class="blur-background ansiedad-blur"></div>
+                        <div class="button-content relative z-10 h-full flex flex-col items-center justify-center p-8 text-center">
+                            <div class="icon-container mb-6">
+                                <svg class="w-20 h-20 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <!-- Cara circular -->
+                                    <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                                    <!-- Cejas preocupadas inclinadas hacia arriba en el centro -->
+                                    <path stroke-linecap="round" stroke-width="2" d="M6 8c1.5 1 2.5 0.5 3.5 0"/>
+                                    <path stroke-linecap="round" stroke-width="2" d="M18 8c-1.5 1-2.5 0.5-3.5 0"/>
+                                    <!-- Ojos ovalados grandes (preocupados) -->
+                                    <ellipse cx="8.5" cy="11" rx="1.5" ry="2" fill="currentColor"/>
+                                    <ellipse cx="15.5" cy="11" rx="1.5" ry="2" fill="currentColor"/>
+                                    <!-- Boca abierta hacia abajo (angustia) -->
+                                    <ellipse cx="12" cy="17" rx="3" ry="2" stroke-width="2"/>
+                                    <!-- Gota de sudor -->
+                                    <path fill="currentColor" d="M3.5 11c0 0-1.5 2-1.5 3c0 1 0.7 1.5 1.5 1.5s1.5-0.5 1.5-1.5c0-1-1.5-3-1.5-3z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-3xl font-bold text-white mb-3">Ansiedad</h3>
+                            <p class="text-sm text-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                Calma tu mente y encuentra paz interior
+                            </p>
+                        </div>
+                    </div>
+                </div>
 
-        function selectEmotion(emotion) {
-            const data = emotionsData[emotion];
-            const panel = document.getElementById('result-panel');
-            const title = document.getElementById('result-title');
-            const message = document.getElementById('result-message');
+                <!-- Botón Ira -->
+                <div class="button-card fade-in" style="animation-delay: 0.4s">
+                    <div class="emotion-button group relative w-full h-80 rounded-3xl overflow-hidden transition-all duration-500 hover:scale-105 hover:shadow-2xl cursor-pointer">
+                        <div class="blur-background ira-blur"></div>
+                        <div class="button-content relative z-10 h-full flex flex-col items-center justify-center p-8 text-center">
+                            <div class="icon-container mb-6">
+                                <svg class="w-20 h-20 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9.5c0-.5.5-1 1-1s1 .5 1 1M14 9.5c0-.5.5-1 1-1s1 .5 1 1"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 15c.5-1 1.5-1.5 4-1.5s3.5.5 4 1.5"/>
+                                    <path stroke-linecap="round" stroke-width="2" d="M9 6.5L7 4M15 6.5L17 4"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-3xl font-bold text-white mb-3">Ira</h3>
+                            <p class="text-sm text-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                Gestiona tus emociones intensas
+                            </p>
+                        </div>
+                    </div>
+                </div>
 
-            // Animación de salida
-            panel.classList.add('opacity-0', 'scale-95');
+                <!-- Botón Estrés -->
+                <div class="button-card fade-in" style="animation-delay: 0.6s">
+                    <div class="emotion-button group relative w-full h-80 rounded-3xl overflow-hidden transition-all duration-500 hover:scale-105 hover:shadow-2xl cursor-pointer">
+                        <div class="blur-background estres-blur"></div>
+                        <div class="button-content relative z-10 h-full flex flex-col items-center justify-center p-8 text-center">
+                            <div class="icon-container mb-6">
+                                <svg class="w-20 h-20 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <!-- Cara circular -->
+                                    <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                                    <!-- Ojo izquierdo > -->
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7l2 2l-2 2"/>
+                                    <!-- Ojo derecho < -->
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7l-2 2l2 2"/>
+                                    <!-- Boca abierta estresada -->
+                                    <ellipse cx="12" cy="16" rx="4" ry="2" stroke-width="2"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-3xl font-bold text-white mb-3">Estrés</h3>
+                            <p class="text-sm text-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                Encuentra balance y relajación
+                            </p>
+                        </div>
+                    </div>
+                </div>
 
-            setTimeout(() => {
-                // Actualizar contenido
-                title.innerHTML = `${data.emoji} ${data.title}`;
-                title.className = `text-2xl font-bold mb-4 ${data.color}`;
-                message.textContent = data.message;
-                message.className = 'text-gray-200 text-lg';
+            </div>
 
-                // Actualizar estilos del panel
-                panel.className = `${data.bgColor} backdrop-blur-sm rounded-2xl p-8 text-center transition-all duration-500 border-2 ${data.borderColor}`;
-
-                // Animación de entrada
-                panel.classList.remove('opacity-0', 'scale-95');
-                panel.classList.add('opacity-100', 'scale-100');
-            }, 200);
-        }
-    </script>
-    
+        </div>
+    </div>
+    {% endif %}
 </body>
 </html>

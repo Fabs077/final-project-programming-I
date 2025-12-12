@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - Centro de Bienestar Emocional</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="max-w-4xl w-full">
+            
+            <!-- Contenedor Principal -->
+            <div class="fade-in">
+                
+                <!-- Encabezado con blur según la emoción -->
+                <div class="relative overflow-hidden rounded-3xl mb-8">
+                    <div class="blur-background {{ emotion }}-blur"></div>
+                    <div class="relative z-10 bg-black/20 backdrop-blur-md p-12 text-center">
+                        <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
+                            {{ title }}
+                        </h1>
+                        <p class="text-xl text-gray-200">
+                            {{ message }}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Recomendaciones -->
+                <div class="bg-white/5 backdrop-blur-md rounded-2xl p-8 mb-8">
+                    <h2 class="text-2xl font-bold text-white mb-6">
+                        Recomendaciones para ti
+                    </h2>
+                    <div class="space-y-4">
+                        {% for recommendation in recommendations %}
+                        <div class="flex items-start space-x-3 bg-white/5 rounded-xl p-4 transition-all hover:bg-white/10">
+                            <svg class="w-6 h-6 text-green-400 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <p class="text-lg text-gray-200">{{ recommendation }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Estadísticas -->
+                <div class="bg-white/5 backdrop-blur-md rounded-2xl p-8 mb-8">
+                    <h2 class="text-2xl font-bold text-white mb-4">
+                        No estás solo
+                    </h2>
+                    <p class="text-gray-300 text-lg">
+                        Muchas personas están trabajando en su bienestar emocional. 
+                        Cada paso que das es importante en tu camino hacia el equilibrio.
+                    </p>
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="flex flex-col md:flex-row gap-4">
+                    <a href="/?show=main" 
+                       class="flex-1 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 text-center border border-white/20 hover:border-white/40">
+                        Explorar otras emociones
+                    </a>
+                    <a href="/" 
+                       class="flex-1 bg-purple-600/80 hover:bg-purple-600 backdrop-blur-md text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 text-center border border-purple-400/50 hover:border-purple-400">
+                        Volver al inicio
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>

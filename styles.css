@@ -1,0 +1,227 @@
+/* Animaciones globales */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.3;
+    }
+}
+
+@keyframes gradient-shift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Estilos del mensaje de bienvenida */
+.welcome-text {
+    animation: fadeIn 1.5s ease-out;
+    text-shadow: 0 0 30px rgba(167, 139, 250, 0.5);
+}
+
+.welcome-subtext {
+    animation: fadeIn 2s ease-out;
+    animation-delay: 0.5s;
+    opacity: 0;
+    animation-fill-mode: forwards;
+}
+
+/* Puntos de carga */
+.loading-dots {
+    animation: fadeIn 1s ease-out;
+    animation-delay: 1s;
+    opacity: 0;
+    animation-fill-mode: forwards;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    background: linear-gradient(135deg, #a78bfa, #ec4899);
+    border-radius: 50%;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.dot:nth-child(2) {
+    animation-delay: 0.3s;
+}
+
+.dot:nth-child(3) {
+    animation-delay: 0.6s;
+}
+
+/* Fade in para elementos */
+.fade-in {
+    animation: fadeIn 1s ease-out forwards;
+    opacity: 0;
+}
+
+/* Efectos de blur para cada botón */
+.blur-background {
+    position: absolute;
+    inset: 0;
+    filter: blur(40px);
+    opacity: 0.9;
+    transition: all 0.5s ease;
+    background-size: 300% 300%;
+    animation: gradient-shift 8s ease infinite;
+}
+
+/* Ansiedad - Azul y Verde */
+.ansiedad-blur {
+    background: linear-gradient(
+        135deg,
+        #0ea5e9,
+        #06b6d4,
+        #14b8a6,
+        #10b981,
+        #0ea5e9
+    );
+}
+
+/* Ira - Rojo a Violeta */
+.ira-blur {
+    background: linear-gradient(
+        135deg,
+        #ef4444,
+        #f97316,
+        #ec4899,
+        #a855f7,
+        #8b5cf6,
+        #ef4444
+    );
+}
+
+/* Estrés - Naranja óxido a Lavanda */
+.estres-blur {
+    background: linear-gradient(
+        135deg,
+        #f97316,
+        #fb923c,
+        #fbbf24,
+        #c084fc,
+        #a78bfa,
+        #f97316
+    );
+}
+
+/* Efectos hover en los botones */
+.emotion-button:hover .blur-background {
+    filter: blur(50px);
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.emotion-button {
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.emotion-button:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.3),
+        0 0 100px rgba(167, 139, 250, 0.3);
+}
+
+/* Contenido del botón */
+.button-content {
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(20px);
+    border-radius: inherit;
+    transition: all 0.3s ease;
+}
+
+.emotion-button:hover .button-content {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* Iconos */
+.icon-container {
+    transition: transform 0.5s ease;
+}
+
+.emotion-button:hover .icon-container {
+    transform: scale(1.1) rotate(5deg);
+}
+
+/* Animación de tarjetas */
+.button-card {
+    animation: fadeIn 1s ease-out forwards;
+}
+
+/* Transiciones suaves */
+* {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Mensaje de selección */
+#selection-message {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(167, 139, 250, 0.5);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(167, 139, 250, 0.7);
+}
+
+/* Efectos de resplandor suave */
+@keyframes soft-glow {
+    0%, 100% {
+        box-shadow: 
+            0 0 20px rgba(167, 139, 250, 0.3),
+            0 0 40px rgba(167, 139, 250, 0.1);
+    }
+    50% {
+        box-shadow: 
+            0 0 30px rgba(167, 139, 250, 0.5),
+            0 0 60px rgba(167, 139, 250, 0.2);
+    }
+}
+
+.emotion-button:hover {
+    animation: soft-glow 2s ease-in-out infinite;
+}
+
+/* Responsividad mejorada */
+@media (max-width: 768px) {
+    .emotion-button {
+        height: 16rem;
+    }
+    
+    .blur-background {
+        filter: blur(30px);
+    }
+}
