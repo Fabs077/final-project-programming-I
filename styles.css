@@ -225,3 +225,150 @@
         filter: blur(30px);
     }
 }
+
+/* ========================================
+   ESTILOS COMPARTIDOS - Ejercicios de Respiración
+   DRY: Usados en ansiedad.html, ira.html, estres.html
+   ======================================== */
+
+/* Canvas de fondo */
+.exercise-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+/* Capa de contenido */
+.content-layer {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+/* Círculo de respiración */
+.circle-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 330px;
+    height: 330px;
+}
+
+.breathing-circle {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 6px solid transparent;
+    position: absolute;
+}
+
+/* Texto de instrucción */
+.instruction-text {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 300;
+    color: white;
+    letter-spacing: 0.2em;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    transition: opacity 1s ease-in-out, filter 1s ease-in-out;
+}
+
+.text-fade-blur {
+    opacity: 0;
+    filter: blur(15px);
+}
+
+/* Botones de respuesta */
+.btn-response {
+    padding: 1rem 3rem;
+    border-radius: 1rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    border: 2px solid transparent;
+}
+
+.btn-yes {
+    background: rgba(34, 197, 94, 0.3);
+    border-color: rgba(34, 197, 94, 0.5);
+    color: white;
+}
+
+.btn-yes:hover {
+    background: rgba(34, 197, 94, 0.5);
+    transform: scale(1.05);
+}
+
+.btn-no {
+    background: rgba(239, 68, 68, 0.3);
+    border-color: rgba(239, 68, 68, 0.5);
+    color: white;
+}
+
+.btn-no:hover {
+    background: rgba(239, 68, 68, 0.5);
+    transform: scale(1.05);
+}
+
+/* Botón de volver */
+.back-button {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    color: white;
+    padding: 0.75rem 2rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.back-button:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateX(-50%) scale(1.05);
+}
+
+/* Utilidades */
+.hidden { display: none !important; }
+
+.fade-in { 
+    animation: fadeIn 1s ease-in forwards; 
+}
+
+.fade-out { 
+    animation: fadeOut 1s ease-out forwards; 
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+/* Shake para ira */
+@keyframes shake {
+    0%, 100% { margin-left: 0; }
+    20% { margin-left: -4px; }
+    40% { margin-left: 4px; }
+    60% { margin-left: -4px; }
+    80% { margin-left: 4px; }
+}
+
+.shake {
+    animation: shake 0.4s ease-in-out infinite;
+}

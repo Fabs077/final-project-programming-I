@@ -5,13 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ejercicio de Respiración - Ansiedad</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        /* Estilos especificos de esta pagina */
         body {
             min-height: 100vh;
             overflow: hidden;
@@ -21,136 +17,16 @@
             background: #0a1a1f;
         }
 
-        #bg-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-        }
-
         .overlay {
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.1);
             z-index: 1;
         }
-
-        .content-layer {
-            position: relative;
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .circle-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 330px;
-            height: 330px;
-        }
-
-        .breathing-circle {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            border: 6px solid transparent;
-            position: absolute;
-        }
-
-        .instruction-text {
-            position: relative;
-            z-index: 10;
-            text-align: center;
-            font-size: 1.5rem;
-            font-weight: 300;
-            color: white;
-            letter-spacing: 0.2em;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-            transition: opacity 1s ease-in-out, filter 1s ease-in-out;
-        }
-
-        .text-fade-blur {
-            opacity: 0;
-            filter: blur(15px);
-        }
-
-        .fade-in { animation: fadeIn 1s ease-in forwards; }
-        .fade-out { animation: fadeOut 1s ease-out forwards; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
-
-        .hidden { display: none !important; }
-
-        #question-container {
-            text-align: center;
-        }
-
-        .btn-response {
-            padding: 1rem 3rem;
-            border-radius: 1rem;
-            font-size: 1.25rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.3);
-        }
-
-        .btn-yes {
-            background: rgba(34, 197, 94, 0.3);
-            color: white;
-        }
-        .btn-yes:hover {
-            background: rgba(34, 197, 94, 0.5);
-            transform: scale(1.05);
-        }
-
-        .btn-no {
-            background: rgba(239, 68, 68, 0.3);
-            color: white;
-        }
-        .btn-no:hover {
-            background: rgba(239, 68, 68, 0.5);
-            transform: scale(1.05);
-        }
-
-        .back-button {
-            position: fixed;
-            bottom: 2rem;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 100;
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(10px);
-            color: white;
-            padding: 0.75rem 2rem;
-            border-radius: 9999px;
-            border: 1px solid rgba(255,255,255,0.3);
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-        .back-button:hover {
-            background: rgba(255,255,255,0.3);
-            transform: translateX(-50%) scale(1.05);
-        }
     </style>
 </head>
 <body>
-    <canvas id="bg-canvas"></canvas>
+    <canvas id="bg-canvas" class="exercise-canvas"></canvas>
     <div class="overlay"></div>
 
     <div class="content-layer">
@@ -180,111 +56,33 @@
 
     <a href="/?show=main" class="back-button">← Volver</a>
 
+    <script src="utils.js"></script>
     <script>
-        // Configuracion
+        // Configuracion desde parameters.py
         const CONFIG = {
-            inhaleTime: 4000,
-            pauseTime: 500,
-            exhaleTime: 4000,
-            cycles: 5,
+            inhaleTime: {{ config.inhale_time }} * 1000,
+            pauseTime: {{ config.pause_time }} * 1000,
+            exhaleTime: {{ config.exhale_time }} * 1000,
+            cycles: {{ config.cycles }},
             scaleMax: 2.2,
             scaleMin: 1,
-            fadeTime: 1000,
-            messageTime: 2000
+            fadeTime: {{ general.fade_duration }} * 1000,
+            messageTime: {{ general.message_display_time }} * 1000
         };
 
-        // Colores en RGB - Paleta azul/cyan/teal
+        // Colores desde parameters.py
         const COLORS = {
-            // Inhalar - azules claros (calma)
-            inhale: [
-                {r: 14, g: 165, b: 233},   // sky-500
-                {r: 56, g: 189, b: 248},   // sky-400
-                {r: 125, g: 211, b: 252},  // sky-300
-                {r: 6, g: 182, b: 212},    // cyan-500
-                {r: 34, g: 211, b: 238},   // cyan-400
-                {r: 103, g: 232, b: 249}   // cyan-300
-            ],
-            // Exhalar - teals/verdes (tranquilidad profunda)
-            exhale: [
-                {r: 103, g: 232, b: 249},  // cyan-300
-                {r: 45, g: 212, b: 191},   // teal-400
-                {r: 20, g: 184, b: 166},   // teal-500
-                {r: 13, g: 148, b: 136},   // teal-600
-                {r: 16, g: 185, b: 129},   // emerald-500
-                {r: 52, g: 211, b: 153}    // emerald-400
-            ]
+            inhale: {{ config.colors.inhale | tojson }},
+            exhale: {{ config.colors.exhale | tojson }}
         };
 
-        // Utilidades
-        function lerp(a, b, t) {
-            return a + (b - a) * t;
-        }
-
-        function lerpColor(c1, c2, t) {
-            return {
-                r: Math.round(lerp(c1.r, c2.r, t)),
-                g: Math.round(lerp(c1.g, c2.g, t)),
-                b: Math.round(lerp(c1.b, c2.b, t))
-            };
-        }
-
-        function getColorFromArray(arr, progress) {
-            const idx = progress * (arr.length - 1);
-            const lo = Math.floor(idx);
-            const hi = Math.min(lo + 1, arr.length - 1);
-            return lerpColor(arr[lo], arr[hi], idx - lo);
-        }
-
-        function easeInOutCubic(t) {
-            return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-        }
-
-        function easeOutCubic(t) {
-            return 1 - Math.pow(1 - t, 3);
-        }
-
-        function easeInCubic(t) {
-            return t * t * t;
-        }
-
-        // Canvas
+        // Canvas - usando funciones de utils.js
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
+        setupCanvas(canvas);
 
         function drawBackground(color) {
-            const w = canvas.width;
-            const h = canvas.height;
-            
-            // Fondo base oscuro azulado
-            ctx.fillStyle = `rgb(${Math.floor(color.r * 0.1)}, ${Math.floor(color.g * 0.15)}, ${Math.floor(color.b * 0.2)})`;
-            ctx.fillRect(0, 0, w, h);
-            
-            // Gradientes animados
-            const time = Date.now() * 0.0004;
-            const points = [
-                {x: 0.2 + Math.sin(time) * 0.08, y: 0.2 + Math.cos(time * 0.8) * 0.08},
-                {x: 0.8 + Math.cos(time * 1.2) * 0.08, y: 0.3 + Math.sin(time) * 0.08},
-                {x: 0.5 + Math.sin(time * 0.7) * 0.1, y: 0.5 + Math.cos(time * 1.1) * 0.1},
-                {x: 0.7 + Math.cos(time * 0.9) * 0.08, y: 0.8 + Math.sin(time * 0.6) * 0.08},
-                {x: 0.3 + Math.sin(time * 1.3) * 0.08, y: 0.7 + Math.cos(time * 0.5) * 0.08}
-            ];
-            
-            points.forEach((p, i) => {
-                const grad = ctx.createRadialGradient(p.x * w, p.y * h, 0, p.x * w, p.y * h, w * 0.5);
-                const alpha = 0.35 + Math.sin(time + i) * 0.1;
-                grad.addColorStop(0, `rgba(${color.r}, ${color.g}, ${color.b}, ${alpha})`);
-                grad.addColorStop(0.4, `rgba(${color.r}, ${color.g}, ${color.b}, ${alpha * 0.4})`);
-                grad.addColorStop(1, 'transparent');
-                ctx.fillStyle = grad;
-                ctx.fillRect(0, 0, w, h);
-            });
+            drawRadialGradient(ctx, canvas, color, 0.1, 0.15, 0.2, 0.0004);
         }
 
         // Elementos

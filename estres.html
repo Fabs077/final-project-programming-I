@@ -5,30 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ejercicio de Sincronizacion - Estres</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
     <style>
         :root {
-            /* Colores desde Python */
-            --chaos-1: {{ config.colors.chaos_1 }};
-            --chaos-2: {{ config.colors.chaos_2 }};
-            --chaos-3: {{ config.colors.chaos_3 }};
-            --chaos-4: {{ config.colors.chaos_4 }};
-            --trans-1: {{ config.colors.trans_1 }};
-            --trans-2: {{ config.colors.trans_2 }};
-            --trans-3: {{ config.colors.trans_3 }};
-            --trans-4: {{ config.colors.trans_4 }};
-            --calm-1: {{ config.colors.calm_1 }};
-            --calm-2: {{ config.colors.calm_2 }};
-            --calm-3: {{ config.colors.calm_3 }};
-            --calm-4: {{ config.colors.calm_4 }};
-            --calm-5: {{ config.colors.calm_5 }};
-            
             --fade-duration: {{ general.fade_duration }}s;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
         }
 
         body {
@@ -39,37 +19,6 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-        }
-
-        #wave-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-
-        .content-layer {
-            position: relative;
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            width: 100%;
-            padding: 2rem;
-        }
-
-        .instruction-text {
-            font-size: 2rem;
-            font-weight: 300;
-            color: white;
-            text-align: center;
-            letter-spacing: 0.2em;
-            text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
-            transition: opacity 1.5s ease-in-out, transform 1.5s ease-in-out;
         }
 
         .progress-bar-container {
@@ -87,120 +36,45 @@
         .progress-bar {
             height: 100%;
             width: 0%;
-            background: linear-gradient(90deg, var(--chaos-3), var(--calm-1), var(--calm-3));
+            background: linear-gradient(90deg, #f97316, #2dd4bf, #a78bfa);
             border-radius: 2px;
             transition: width 0.1s linear;
         }
 
-        /* Efectos de desvanecimiento */
-        .fade-in {
-            animation: fadeIn var(--fade-duration) ease-in forwards;
-        }
+        .fade-in { animation: fadeInSlide var(--fade-duration) ease-in forwards; }
+        .fade-out { animation: fadeOutSlide var(--fade-duration) ease-out forwards; }
 
-        .fade-out {
-            animation: fadeOut var(--fade-duration) ease-out forwards;
-        }
-
-        @keyframes fadeIn {
+        @keyframes fadeInSlide {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        @keyframes fadeOut {
+        @keyframes fadeOutSlide {
             from { opacity: 1; transform: translateY(0); }
             to { opacity: 0; transform: translateY(-20px); }
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        /* Contenedor de pregunta */
-        #question-container {
-            text-align: center;
-        }
-
-        .btn-response {
-            padding: 12px 32px;
-            border-radius: 9999px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            cursor: pointer;
-        }
-
-        .btn-yes {
-            background: rgba(45, 212, 191, 0.3);
-            border: 2px solid rgba(45, 212, 191, 0.5);
-            color: white;
-        }
-
-        .btn-yes:hover {
-            background: rgba(45, 212, 191, 0.5);
-            transform: scale(1.05);
-        }
-
-        .btn-no {
-            background: rgba(234, 88, 12, 0.3);
-            border: 2px solid rgba(234, 88, 12, 0.5);
-            color: white;
-        }
-
-        .btn-no:hover {
-            background: rgba(234, 88, 12, 0.5);
-            transform: scale(1.05);
-        }
-
-        .back-button {
-            position: fixed;
-            bottom: 2rem;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 100;
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(10px);
-            color: white;
-            padding: 0.75rem 2rem;
-            border-radius: 9999px;
-            border: 1px solid rgba(255,255,255,0.3);
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-        .back-button:hover {
-            background: rgba(255,255,255,0.3);
-            transform: translateX(-50%) scale(1.05);
         }
     </style>
 </head>
 <body>
-    <!-- Canvas para las ondas -->
-    <canvas id="wave-canvas"></canvas>
+    <canvas id="wave-canvas" class="exercise-canvas"></canvas>
 
-    <!-- Capa de contenido -->
     <div class="content-layer">
-        <!-- Contenedor principal del ejercicio -->
         <div id="exercise-container" class="fade-in">
-            <p id="instruction-text" class="instruction-text">
+            <p id="instruction-text" class="instruction-text" style="font-size: 2rem;">
                 {{ config.messages.start }}
             </p>
         </div>
 
-        <!-- Contenedor de pregunta (oculto inicialmente) -->
         <div id="question-container" class="hidden">
             <p class="text-white text-2xl md:text-3xl font-light mb-8 tracking-wide">
                 {{ config.messages.question }}
             </p>
             <div class="flex gap-6 justify-center">
-                <button id="btn-yes" class="btn-response btn-yes">
-                    Si
-                </button>
-                <button id="btn-no" class="btn-response btn-no">
-                    No
-                </button>
+                <button id="btn-yes" class="btn-response btn-yes">Si</button>
+                <button id="btn-no" class="btn-response btn-no">No</button>
             </div>
         </div>
 
-        <!-- Mensaje final de exito (oculto inicialmente) -->
         <div id="final-message" class="hidden">
             <p class="text-white text-3xl md:text-4xl font-light tracking-wide text-center">
                 {{ config.messages.success }}
@@ -208,17 +82,15 @@
         </div>
     </div>
 
-    <!-- Barra de progreso -->
     <div id="progress-container" class="progress-bar-container">
         <div id="progress-bar" class="progress-bar"></div>
     </div>
 
     <a href="/?show=main" class="back-button">← Volver</a>
 
+    <script src="utils.js"></script>
     <script>
-        // ========================================
-        // CONFIGURACION DESDE PYTHON
-        // ========================================
+        // Configuracion desde parameters.py
         const CONFIG = {
             duration: {{ config.duration }} * 1000,
             waveCount: {{ config.wave_count }},
@@ -232,41 +104,19 @@
             messageTime: {{ general.message_display_time }} * 1000
         };
 
-        // Mensajes
         const MESSAGES = {
             start: "{{ config.messages.start }}",
             middle: "{{ config.messages.middle }}",
             end: "{{ config.messages.end }}"
         };
 
-        // Colores (convertir hex a RGB para interpolacion)
-        function hexToRgb(hex) {
-            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-            return result ? {
-                r: parseInt(result[1], 16),
-                g: parseInt(result[2], 16),
-                b: parseInt(result[3], 16)
-            } : null;
-        }
-
+        // Colores desde parameters.py
         const COLORS = {
-            chaos: [
-                hexToRgb('{{ config.colors.chaos_1 }}'),
-                hexToRgb('{{ config.colors.chaos_2 }}'),
-                hexToRgb('{{ config.colors.chaos_3 }}'),
-                hexToRgb('{{ config.colors.chaos_4 }}')
-            ],
-            calm: [
-                hexToRgb('{{ config.colors.calm_1 }}'),
-                hexToRgb('{{ config.colors.calm_2 }}'),
-                hexToRgb('{{ config.colors.calm_3 }}'),
-                hexToRgb('{{ config.colors.calm_4 }}')
-            ]
+            chaos: {{ config.colors.chaos | tojson }},
+            calm: {{ config.colors.calm | tojson }}
         };
 
-        // ========================================
-        // PERLIN NOISE (Para caos organico)
-        // ========================================
+        // Perlin Noise
         class PerlinNoise {
             constructor() {
                 this.permutation = [];
@@ -275,40 +125,24 @@
                 }
                 this.permutation = this.permutation.concat(this.permutation);
             }
-
-            fade(t) {
-                return t * t * t * (t * (t * 6 - 15) + 10);
-            }
-
-            lerp(a, b, t) {
-                return a + t * (b - a);
-            }
-
-            grad(hash, x) {
-                return (hash & 1) === 0 ? x : -x;
-            }
-
+            fade(t) { return t * t * t * (t * (t * 6 - 15) + 10); }
+            grad(hash, x) { return (hash & 1) === 0 ? x : -x; }
             noise(x) {
                 const X = Math.floor(x) & 255;
                 x -= Math.floor(x);
                 const u = this.fade(x);
-                return this.lerp(
-                    this.grad(this.permutation[X], x),
-                    this.grad(this.permutation[X + 1], x - 1),
-                    u
-                );
+                return lerp(this.grad(this.permutation[X], x), 
+                           this.grad(this.permutation[X + 1], x - 1), u);
             }
         }
 
-        // ========================================
-        // SISTEMA DE ONDAS
-        // ========================================
+        // Canvas y estado
         const canvas = document.getElementById('wave-canvas');
         const ctx = canvas.getContext('2d');
         const perlin = new PerlinNoise();
+        setupCanvas(canvas);
 
         let startTime = Date.now();
-        let animationId;
         let isRunning = true;
 
         // Elementos del DOM
@@ -319,83 +153,40 @@
         const progressBar = document.getElementById('progress-bar');
         const progressContainer = document.getElementById('progress-container');
 
-        // Configuracion del canvas
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
-
-        // Interpolacion lineal
-        function lerp(start, end, t) {
-            return start + (end - start) * t;
-        }
-
-        // Interpolacion de color
-        function lerpColor(color1, color2, t) {
-            return {
-                r: Math.round(lerp(color1.r, color2.r, t)),
-                g: Math.round(lerp(color1.g, color2.g, t)),
-                b: Math.round(lerp(color1.b, color2.b, t))
-            };
-        }
-
-        // Easing suave (ease-in-out)
-        function easeInOutCubic(t) {
-            return t < 0.5 
-                ? 4 * t * t * t 
-                : 1 - Math.pow(-2 * t + 2, 3) / 2;
-        }
-
         // Dibujar una onda individual
         function drawWave(time, waveIndex, progress, chaos, speed, amplitude, baseColor) {
             const width = canvas.width;
             const height = canvas.height;
             const centerY = height / 2;
             
-            // Parametros de la onda
             const frequency = 0.003 + waveIndex * 0.001;
             const phaseOffset = waveIndex * Math.PI / CONFIG.waveCount;
             const verticalOffset = (waveIndex - CONFIG.waveCount / 2) * 40;
-            
-            // Movimiento base
             const baseMovement = time * speed * 0.001;
             
             ctx.beginPath();
             ctx.moveTo(0, centerY);
             
             for (let x = 0; x <= width; x += 2) {
-                // Onda sinusoidal base
                 let y = Math.sin(x * frequency + baseMovement + phaseOffset) * amplitude;
-                
-                // Agregar harmonicos para ondas mas interesantes
                 y += Math.sin(x * frequency * 2 + baseMovement * 1.5) * (amplitude * 0.3);
                 y += Math.sin(x * frequency * 0.5 + baseMovement * 0.7) * (amplitude * 0.5);
                 
-                // Agregar ruido Perlin para caos
                 if (chaos > 0.01) {
                     const noiseX = x * 0.01 + time * 0.003 + waveIndex * 10;
-                    const noiseValue = perlin.noise(noiseX);
-                    y += noiseValue * amplitude * chaos * 2;
-                    
-                    // Ruido de alta frecuencia para efecto caotico
-                    const highFreqNoise = perlin.noise(noiseX * 3 + time * 0.01);
-                    y += highFreqNoise * amplitude * chaos * 1.5;
+                    y += perlin.noise(noiseX) * amplitude * chaos * 2;
+                    y += perlin.noise(noiseX * 3 + time * 0.01) * amplitude * chaos * 1.5;
                 }
                 
                 ctx.lineTo(x, centerY + y + verticalOffset);
             }
             
-            // Estilo de la linea
             const alpha = 0.3 + (1 - waveIndex / CONFIG.waveCount) * 0.4;
             ctx.strokeStyle = `rgba(${baseColor.r}, ${baseColor.g}, ${baseColor.b}, ${alpha})`;
             ctx.lineWidth = 2 + (CONFIG.waveCount - waveIndex) * 0.5;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
             ctx.stroke();
-            
-            // Efecto de brillo
             ctx.shadowColor = `rgba(${baseColor.r}, ${baseColor.g}, ${baseColor.b}, ${alpha * 0.5})`;
             ctx.shadowBlur = 15;
         }
