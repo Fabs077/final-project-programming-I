@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio de Sincronizacion - Estres</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            /* Colores desde Python */
+            --chaos-1: {{ config.colors.chaos_1 }};
+            --chaos-2: {{ config.colors.chaos_2 }};
+            --chaos-3: {{ config.colors.chaos_3 }};
+            --chaos-4: {{ config.colors.chaos_4 }};
+            --trans-1: {{ config.colors.trans_1 }};
+            --trans-2: {{ config.colors.trans_2 }};
+            --trans-3: {{ config.colors.trans_3 }};
+            --trans-4: {{ config.colors.trans_4 }};
+            --calm-1: {{ config.colors.calm_1 }};
+            --calm-2: {{ config.colors.calm_2 }};
+            --calm-3: {{ config.colors.calm_3 }};
+            --calm-4: {{ config.colors.calm_4 }};
+            --calm-5: {{ config.colors.calm_5 }};
+            
+            --fade-duration: {{ general.fade_duration }}s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            overflow: hidden;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #wave-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .content-layer {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            width: 100%;
+            padding: 2rem;
+        }
+
+        .instruction-text {
+            font-size: 2rem;
+            font-weight: 300;
+            color: white;
+            text-align: center;
+            letter-spacing: 0.2em;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+            transition: opacity 1.5s ease-in-out, transform 1.5s ease-in-out;
+        }
+
+        .progress-bar-container {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--chaos-3), var(--calm-1), var(--calm-3));
+            border-radius: 2px;
+            transition: width 0.1s linear;
+        }
+
+        /* Efectos de desvanecimiento */
+        .fade-in {
+            animation: fadeIn var(--fade-duration) ease-in forwards;
+        }
+
+        .fade-out {
+            animation: fadeOut var(--fade-duration) ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-20px); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Contenedor de pregunta */
+        #question-container {
+            text-align: center;
+        }
+
+        .btn-response {
+            padding: 12px 32px;
+            border-radius: 9999px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+        }
+
+        .btn-yes {
+            background: rgba(45, 212, 191, 0.3);
+            border: 2px solid rgba(45, 212, 191, 0.5);
+            color: white;
+        }
+
+        .btn-yes:hover {
+            background: rgba(45, 212, 191, 0.5);
+            transform: scale(1.05);
+        }
+
+        .btn-no {
+            background: rgba(234, 88, 12, 0.3);
+            border: 2px solid rgba(234, 88, 12, 0.5);
+            color: white;
+        }
+
+        .btn-no:hover {
+            background: rgba(234, 88, 12, 0.5);
+            transform: scale(1.05);
+        }
+
+        .back-button {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 9999px;
+            border: 1px solid rgba(255,255,255,0.3);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .back-button:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateX(-50%) scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <!-- Canvas para las ondas -->
+    <canvas id="wave-canvas"></canvas>
+
+    <!-- Capa de contenido -->
+    <div class="content-layer">
+        <!-- Contenedor principal del ejercicio -->
+        <div id="exercise-container" class="fade-in">
+            <p id="instruction-text" class="instruction-text">
+                {{ config.messages.start }}
+            </p>
+        </div>
+
+        <!-- Contenedor de pregunta (oculto inicialmente) -->
+        <div id="question-container" class="hidden">
+            <p class="text-white text-2xl md:text-3xl font-light mb-8 tracking-wide">
+                {{ config.messages.question }}
+            </p>
+            <div class="flex gap-6 justify-center">
+                <button id="btn-yes" class="btn-response btn-yes">
+                    Si
+                </button>
+                <button id="btn-no" class="btn-response btn-no">
+                    No
+                </button>
+            </div>
+        </div>
+
+        <!-- Mensaje final de exito (oculto inicialmente) -->
+        <div id="final-message" class="hidden">
+            <p class="text-white text-3xl md:text-4xl font-light tracking-wide text-center">
+                {{ config.messages.success }}
+            </p>
+        </div>
+    </div>
+
+    <!-- Barra de progreso -->
+    <div id="progress-container" class="progress-bar-container">
+        <div id="progress-bar" class="progress-bar"></div>
+    </div>
+
+    <a href="/?show=main" class="back-button">← Volver</a>
+
+    <script>
+        // ========================================
+        // CONFIGURACION DESDE PYTHON
+        // ========================================
+        const CONFIG = {
+            duration: {{ config.duration }} * 1000,
+            waveCount: {{ config.wave_count }},
+            initialChaos: {{ config.initial_chaos }},
+            finalChaos: {{ config.final_chaos }},
+            initialSpeed: {{ config.initial_speed }},
+            finalSpeed: {{ config.final_speed }},
+            initialAmplitude: {{ config.initial_amplitude }},
+            finalAmplitude: {{ config.final_amplitude }},
+            fadeTime: {{ general.fade_duration }} * 1000,
+            messageTime: {{ general.message_display_time }} * 1000
+        };
+
+        // Mensajes
+        const MESSAGES = {
+            start: "{{ config.messages.start }}",
+            middle: "{{ config.messages.middle }}",
+            end: "{{ config.messages.end }}"
+        };
+
+        // Colores (convertir hex a RGB para interpolacion)
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
+        const COLORS = {
+            chaos: [
+                hexToRgb('{{ config.colors.chaos_1 }}'),
+                hexToRgb('{{ config.colors.chaos_2 }}'),
+                hexToRgb('{{ config.colors.chaos_3 }}'),
+                hexToRgb('{{ config.colors.chaos_4 }}')
+            ],
+            calm: [
+                hexToRgb('{{ config.colors.calm_1 }}'),
+                hexToRgb('{{ config.colors.calm_2 }}'),
+                hexToRgb('{{ config.colors.calm_3 }}'),
+                hexToRgb('{{ config.colors.calm_4 }}')
+            ]
+        };
+
+        // ========================================
+        // PERLIN NOISE (Para caos organico)
+        // ========================================
+        class PerlinNoise {
+            constructor() {
+                this.permutation = [];
+                for (let i = 0; i < 256; i++) {
+                    this.permutation[i] = Math.floor(Math.random() * 256);
+                }
+                this.permutation = this.permutation.concat(this.permutation);
+            }
+
+            fade(t) {
+                return t * t * t * (t * (t * 6 - 15) + 10);
+            }
+
+            lerp(a, b, t) {
+                return a + t * (b - a);
+            }
+
+            grad(hash, x) {
+                return (hash & 1) === 0 ? x : -x;
+            }
+
+            noise(x) {
+                const X = Math.floor(x) & 255;
+                x -= Math.floor(x);
+                const u = this.fade(x);
+                return this.lerp(
+                    this.grad(this.permutation[X], x),
+                    this.grad(this.permutation[X + 1], x - 1),
+                    u
+                );
+            }
+        }
+
+        // ========================================
+        // SISTEMA DE ONDAS
+        // ========================================
+        const canvas = document.getElementById('wave-canvas');
+        const ctx = canvas.getContext('2d');
+        const perlin = new PerlinNoise();
+
+        let startTime = Date.now();
+        let animationId;
+        let isRunning = true;
+
+        // Elementos del DOM
+        const instructionText = document.getElementById('instruction-text');
+        const exerciseContainer = document.getElementById('exercise-container');
+        const questionContainer = document.getElementById('question-container');
+        const finalMessage = document.getElementById('final-message');
+        const progressBar = document.getElementById('progress-bar');
+        const progressContainer = document.getElementById('progress-container');
+
+        // Configuracion del canvas
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Interpolacion lineal
+        function lerp(start, end, t) {
+            return start + (end - start) * t;
+        }
+
+        // Interpolacion de color
+        function lerpColor(color1, color2, t) {
+            return {
+                r: Math.round(lerp(color1.r, color2.r, t)),
+                g: Math.round(lerp(color1.g, color2.g, t)),
+                b: Math.round(lerp(color1.b, color2.b, t))
+            };
+        }
+
+        // Easing suave (ease-in-out)
+        function easeInOutCubic(t) {
+            return t < 0.5 
+                ? 4 * t * t * t 
+                : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        }
+
+        // Dibujar una onda individual
+        function drawWave(time, waveIndex, progress, chaos, speed, amplitude, baseColor) {
+            const width = canvas.width;
+            const height = canvas.height;
+            const centerY = height / 2;
+            
+            // Parametros de la onda
+            const frequency = 0.003 + waveIndex * 0.001;
+            const phaseOffset = waveIndex * Math.PI / CONFIG.waveCount;
+            const verticalOffset = (waveIndex - CONFIG.waveCount / 2) * 40;
+            
+            // Movimiento base
+            const baseMovement = time * speed * 0.001;
+            
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            
+            for (let x = 0; x <= width; x += 2) {
+                // Onda sinusoidal base
+                let y = Math.sin(x * frequency + baseMovement + phaseOffset) * amplitude;
+                
+                // Agregar harmonicos para ondas mas interesantes
+                y += Math.sin(x * frequency * 2 + baseMovement * 1.5) * (amplitude * 0.3);
+                y += Math.sin(x * frequency * 0.5 + baseMovement * 0.7) * (amplitude * 0.5);
+                
+                // Agregar ruido Perlin para caos
+                if (chaos > 0.01) {
+                    const noiseX = x * 0.01 + time * 0.003 + waveIndex * 10;
+                    const noiseValue = perlin.noise(noiseX);
+                    y += noiseValue * amplitude * chaos * 2;
+                    
+                    // Ruido de alta frecuencia para efecto caotico
+                    const highFreqNoise = perlin.noise(noiseX * 3 + time * 0.01);
+                    y += highFreqNoise * amplitude * chaos * 1.5;
+                }
+                
+                ctx.lineTo(x, centerY + y + verticalOffset);
+            }
+            
+            // Estilo de la linea
+            const alpha = 0.3 + (1 - waveIndex / CONFIG.waveCount) * 0.4;
+            ctx.strokeStyle = `rgba(${baseColor.r}, ${baseColor.g}, ${baseColor.b}, ${alpha})`;
+            ctx.lineWidth = 2 + (CONFIG.waveCount - waveIndex) * 0.5;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+            
+            // Efecto de brillo
+            ctx.shadowColor = `rgba(${baseColor.r}, ${baseColor.g}, ${baseColor.b}, ${alpha * 0.5})`;
+            ctx.shadowBlur = 15;
+        }
+
+        // Funcion principal de animacion
+        function animate() {
+            if (!isRunning) return;
+            
+            const currentTime = Date.now();
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / CONFIG.duration, 1);
+            const easedProgress = easeInOutCubic(progress);
+            
+            // Actualizar barra de progreso
+            progressBar.style.width = `${progress * 100}%`;
+            
+            // Calcular parametros actuales
+            const currentChaos = lerp(CONFIG.initialChaos, CONFIG.finalChaos, easedProgress);
+            const currentSpeed = lerp(CONFIG.initialSpeed, CONFIG.finalSpeed, easedProgress);
+            const currentAmplitude = lerp(CONFIG.initialAmplitude, CONFIG.finalAmplitude, easedProgress);
+            
+            // Interpolar colores (de caotico a calmo)
+            const colorIndex = Math.min(Math.floor(easedProgress * (COLORS.calm.length - 1)), COLORS.calm.length - 2);
+            const colorT = (easedProgress * (COLORS.calm.length - 1)) % 1;
+            
+            let baseColor;
+            if (progress < 0.4) {
+                // Fase caotica - colores naranja
+                const chaosIndex = Math.min(Math.floor((progress / 0.4) * (COLORS.chaos.length - 1)), COLORS.chaos.length - 2);
+                const chaosT = ((progress / 0.4) * (COLORS.chaos.length - 1)) % 1;
+                baseColor = lerpColor(COLORS.chaos[chaosIndex], COLORS.chaos[chaosIndex + 1], chaosT);
+            } else {
+                // Fase calma - colores turquesa/lavanda
+                const calmProgress = (progress - 0.4) / 0.6;
+                const calmIndex = Math.min(Math.floor(calmProgress * (COLORS.calm.length - 1)), COLORS.calm.length - 2);
+                const calmT = (calmProgress * (COLORS.calm.length - 1)) % 1;
+                baseColor = lerpColor(COLORS.calm[calmIndex], COLORS.calm[calmIndex + 1], calmT);
+            }
+            
+            // Actualizar color de fondo gradualmente
+            const bgOpacity = lerp(0.1, 0.05, easedProgress);
+            document.body.style.background = `linear-gradient(135deg, 
+                rgba(${baseColor.r * 0.1}, ${baseColor.g * 0.1}, ${baseColor.b * 0.15}, 1) 0%, 
+                rgba(${baseColor.r * 0.05}, ${baseColor.g * 0.08}, ${baseColor.b * 0.12}, 1) 50%, 
+                rgba(15, 15, 35, 1) 100%)`;
+            
+            // Limpiar canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Dibujar todas las ondas
+            for (let i = 0; i < CONFIG.waveCount; i++) {
+                drawWave(elapsed, i, progress, currentChaos, currentSpeed, currentAmplitude, baseColor);
+            }
+            
+            // Actualizar mensajes
+            if (progress < 0.33) {
+                instructionText.textContent = MESSAGES.start;
+            } else if (progress < 0.66) {
+                instructionText.textContent = MESSAGES.middle;
+            } else if (progress < 1) {
+                instructionText.textContent = MESSAGES.end;
+            }
+            
+            // Verificar si termino
+            if (progress >= 1) {
+                showQuestion();
+                return;
+            }
+            
+            animationId = requestAnimationFrame(animate);
+        }
+
+        // Mostrar pregunta
+        function showQuestion() {
+            exerciseContainer.classList.add('fade-out');
+            progressContainer.classList.add('fade-out');
+            
+            setTimeout(function() {
+                exerciseContainer.classList.add('hidden');
+                progressContainer.classList.add('hidden');
+                questionContainer.classList.remove('hidden');
+                questionContainer.classList.add('fade-in');
+            }, CONFIG.fadeTime);
+        }
+
+        // Iniciar ejercicio
+        function startExercise() {
+            startTime = Date.now();
+            isRunning = true;
+            animate();
+        }
+
+        // Reiniciar ejercicio
+        function restartExercise() {
+            questionContainer.classList.add('fade-out');
+            
+            setTimeout(function() {
+                questionContainer.classList.add('hidden');
+                questionContainer.classList.remove('fade-in', 'fade-out');
+                
+                exerciseContainer.classList.remove('hidden', 'fade-out');
+                exerciseContainer.classList.add('fade-in');
+                progressContainer.classList.remove('hidden', 'fade-out');
+                progressBar.style.width = '0%';
+                
+                instructionText.textContent = MESSAGES.start;
+                startExercise();
+            }, CONFIG.fadeTime);
+        }
+
+        // Iniciar
+        startExercise();
+
+        // Boton Si
+        document.getElementById('btn-yes').addEventListener('click', function() {
+            isRunning = false;
+            questionContainer.classList.add('fade-out');
+            
+            setTimeout(function() {
+                questionContainer.classList.add('hidden');
+                
+                finalMessage.classList.remove('hidden');
+                finalMessage.classList.add('fade-in');
+                
+                setTimeout(function() {
+                    finalMessage.classList.add('fade-out');
+                    setTimeout(function() {
+                        window.location.href = '/?show=main';
+                    }, CONFIG.fadeTime);
+                }, CONFIG.messageTime);
+            }, CONFIG.fadeTime);
+        });
+
+        // Boton No - Reiniciar
+        document.getElementById('btn-no').addEventListener('click', function() {
+            restartExercise();
+        });
+    </script>
+</body>
+</html>

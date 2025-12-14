@@ -1,153 +1,150 @@
-# Centro de Bienestar Emocional 🌟
+# 🧘 Emotional Wellness Center
 
-Una aplicación web interactiva diseñada para ayudar a gestionar emociones como ansiedad, ira y estrés, con una interfaz suave y relajante.
+A guided breathing web application designed to help users manage intense emotions (anxiety, anger, stress) within 60-90 seconds.
 
-## 🎨 Características
+![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
+![Flask](https://img.shields.io/badge/Flask-2.0+-green.svg)
+![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-- **Interfaz UI/UX moderna** con efectos blur y transiciones suaves
-- **Diseño responsivo** usando Tailwind CSS
-- **Backend en Python** con Flask
-- **Efectos visuales relajantes** con gradientes animados
-- **Mensajes personalizados** para cada emoción
-- **Recomendaciones específicas** basadas en la selección
+## ✨ Features
 
-## 📋 Requisitos Previos
+- **3 Personalized Exercises:**
+  - 🌊 **Anxiety** - 4-4 breathing technique with calming blue/cyan gradients
+  - 🔥 **Anger** - 4-7-8 breathing with color transition (red → yellow → violet)
+  - ⚡ **Stress** - Visual wave synchronization from chaos to calm
 
-- Python 3.8 o superior
-- pip (gestor de paquetes de Python)
+- **Modern UI/UX:**
+  - Canvas-based animations with 60fps smooth rendering
+  - Glassmorphism design with animated gradients
+  - Responsive layout for all devices
+  - Quick access optimized (<3 seconds to start)
 
-## 🚀 Instalación
+- **Visual Feedback:**
+  - Breathing circle that expands/contracts
+  - Dynamic color interpolation
+  - Glow effects synchronized with breathing phases
+  - Progress indicators
 
-1. **Instala las dependencias de Python:**
-   ```powershell
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Python 3.8 or higher
+- pip (Python package manager)
+
+### Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/emotional-wellness-center.git
+   cd emotional-wellness-center
+   ```
+
+2. **Install dependencies:**
+   ```bash
    pip install -r requirements.txt
    ```
 
-## 💻 Uso
-
-1. **Inicia el servidor Flask:**
-   ```powershell
+3. **Run the application:**
+   ```bash
    python app.py
    ```
 
-2. **Abre tu navegador y visita:**
+4. **Open your browser:**
    ```
    http://localhost:5000
    ```
 
-3. **Experimenta la aplicación:**
-   - Verás un mensaje de bienvenida que se desvanece
-   - Selecciona una de las tres opciones (Ansiedad, Ira, Estrés)
-   - Recibe recomendaciones personalizadas
-
-## 📁 Estructura del Proyecto
+## 📁 Project Structure
 
 ```
-final_project_programming_I/
-│
-├── app.py              # Backend Flask (lógica del servidor)
-├── index.html          # Estructura HTML principal
-├── styles.css          # Estilos personalizados y efectos blur
-├── script.js           # Interactividad del frontend
-├── requirements.txt    # Dependencias de Python
-└── README.md          # Este archivo
+emotional-wellness-center/
+├── app.py              # Flask application & routes
+├── parameters.py       # Configuration for all exercises
+├── index.html          # Main page with emotion selection
+├── ansiedad.html       # Anxiety breathing exercise
+├── ira.html            # Anger breathing exercise
+├── estres.html         # Stress wave visualization
+├── styles.css          # Global styles
+├── requirements.txt    # Python dependencies
+└── README.md           # This file
 ```
 
-## 🎨 Paleta de Colores
+## 🎯 How It Works
 
-### Ansiedad (Azul y Verde)
-- Azul cielo: `#0ea5e9`
-- Cyan: `#06b6d4`
-- Teal: `#14b8a6`
-- Verde esmeralda: `#10b981`
+### Anxiety Exercise (4-4 Technique)
+- **Inhale:** 4 seconds (circle expands)
+- **Exhale:** 4 seconds (circle contracts)
+- **Cycles:** 5 repetitions (~45 seconds)
+- **Colors:** Blue → Cyan → Teal gradient
 
-### Ira (Rojo a Violeta)
-- Rojo: `#ef4444`
-- Naranja: `#f97316`
-- Rosa: `#ec4899`
-- Púrpura: `#a855f7`
-- Violeta: `#8b5cf6`
+### Anger Exercise (4-7-8 Technique)
+- **Inhale:** 4 seconds (red tones)
+- **Hold:** 7 seconds (transition to yellow + shake)
+- **Exhale:** 8 seconds (transition to violet)
+- **Cycles:** 2 repetitions (~38 seconds)
 
-### Estrés (Naranja óxido a Lavanda)
-- Naranja: `#f97316`
-- Naranja claro: `#fb923c`
-- Amarillo: `#fbbf24`
-- Púrpura claro: `#c084fc`
-- Lavanda: `#a78bfa`
+### Stress Exercise (Wave Visualization)
+- **Duration:** 30 seconds
+- **Visual:** 5 sinusoidal waves with Perlin noise
+- **Transition:** Chaotic orange → Synchronized lavender/turquoise
+- **Goal:** Sync breathing with wave movement
 
-## 🛠️ Tecnologías Utilizadas
+## ⚙️ Configuration
 
-- **Frontend:**
-  - HTML5
-  - CSS3 (con efectos blur y animaciones)
-  - Tailwind CSS (framework CSS)
-  - JavaScript vanilla
+All exercise parameters can be customized in `parameters.py`:
 
-- **Backend:**
-  - Python 3
-  - Flask (framework web)
-
-## 📊 Endpoints de la API
-
-- `GET /` - Página principal
-- `POST /select_emotion` - Procesar selección de emoción
-- `GET /stats` - Obtener estadísticas de uso
-- `GET /health` - Verificar estado del servidor
-
-## ✨ Características Técnicas
-
-### Efectos Visuales
-- Transiciones suaves con `cubic-bezier`
-- Efectos blur animados en los botones
-- Gradientes que cambian dinámicamente
-- Animaciones de fade-in progresivas
-- Partículas flotantes en el fondo
-
-### Principios UI/UX Aplicados
-- **Claridad:** Mensajes directos y fáciles de entender
-- **Feedback visual:** Animaciones al interactuar
-- **Accesibilidad:** Diseño responsivo para todos los dispositivos
-- **Estética relajante:** Colores y efectos que transmiten calma
-- **Jerarquía visual:** Elementos organizados por importancia
-
-## 🔧 Personalización
-
-Puedes personalizar la aplicación modificando:
-
-- **Colores:** Edita las clases en `styles.css`
-- **Mensajes:** Modifica el diccionario `EMOTION_RESPONSES` en `app.py`
-- **Animaciones:** Ajusta los keyframes en `styles.css`
-- **Tiempo de bienvenida:** Cambia el setTimeout en `script.js`
-
-## 🐛 Solución de Problemas
-
-### El servidor no inicia
-```powershell
-# Verifica que Flask esté instalado
-pip list | Select-String flask
-
-# Reinstala las dependencias
-pip install -r requirements.txt
+```python
+ANSIEDAD = {
+    'inhale_time': 4,      # seconds
+    'exhale_time': 4,      # seconds
+    'cycles': 5,           # repetitions
+    'circle_scale': 2.2,   # max expansion
+    ...
+}
 ```
 
-### Los estilos no se aplican
-- Asegúrate de que `styles.css` esté en el mismo directorio que `index.html`
-- Verifica tu conexión a internet (para Tailwind CDN)
+## 🛠️ Tech Stack
 
-## 📝 Licencia
+- **Backend:** Flask (Python)
+- **Frontend:** HTML5, Tailwind CSS, Vanilla JavaScript
+- **Animations:** Canvas API with requestAnimationFrame
+- **Templating:** Jinja2
 
-Este proyecto es de código abierto y está disponible para uso educativo.
+## 🎨 Design Principles
 
-## 👤 Autor
+1. **Immediate Access:** Users in emotional distress need quick solutions
+2. **Visual Calm:** Dark backgrounds with soft, flowing gradients
+3. **Clear Feedback:** Always know what phase you're in
+4. **Minimal Interaction:** One click to start, focus on breathing
 
-Creado con ❤️ para el proyecto final de Programación I
+## 📱 Responsive Design
 
-## 🙏 Agradecimientos
+The app is fully responsive and works on:
+- Desktop browsers
+- Tablets
+- Mobile phones
 
-- Tailwind CSS por el framework
-- Flask por el framework web
-- La comunidad de desarrollo web por la inspiración
+## 🤝 Contributing
+
+Contributions are welcome! Feel free to:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- Breathing techniques based on clinical research
+- UI inspired by modern wellness applications
+- Built with ❤️ for emotional wellbeing
 
 ---
 
-**¡Disfruta de tu viaje hacia el bienestar emocional! 🌈**
+**Remember:** This app is a tool to help manage emotions, not a replacement for professional mental health support. If you're struggling, please reach out to a mental health professional.

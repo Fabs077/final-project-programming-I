@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio de Respiración - Ansiedad</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0a1a1f;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.1);
+            z-index: 1;
+        }
+
+        .content-layer {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .circle-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 330px;
+            height: 330px;
+        }
+
+        .breathing-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 6px solid transparent;
+            position: absolute;
+        }
+
+        .instruction-text {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 300;
+            color: white;
+            letter-spacing: 0.2em;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            transition: opacity 1s ease-in-out, filter 1s ease-in-out;
+        }
+
+        .text-fade-blur {
+            opacity: 0;
+            filter: blur(15px);
+        }
+
+        .fade-in { animation: fadeIn 1s ease-in forwards; }
+        .fade-out { animation: fadeOut 1s ease-out forwards; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        .hidden { display: none !important; }
+
+        #question-container {
+            text-align: center;
+        }
+
+        .btn-response {
+            padding: 1rem 3rem;
+            border-radius: 1rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .btn-yes {
+            background: rgba(34, 197, 94, 0.3);
+            color: white;
+        }
+        .btn-yes:hover {
+            background: rgba(34, 197, 94, 0.5);
+            transform: scale(1.05);
+        }
+
+        .btn-no {
+            background: rgba(239, 68, 68, 0.3);
+            color: white;
+        }
+        .btn-no:hover {
+            background: rgba(239, 68, 68, 0.5);
+            transform: scale(1.05);
+        }
+
+        .back-button {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 9999px;
+            border: 1px solid rgba(255,255,255,0.3);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .back-button:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateX(-50%) scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+    <div class="overlay"></div>
+
+    <div class="content-layer">
+        <div id="breathing-container">
+            <div class="circle-wrapper">
+                <div id="breathing-circle" class="breathing-circle"></div>
+                <span id="instruction-text" class="instruction-text">Inhala</span>
+            </div>
+        </div>
+
+        <div id="question-container" class="hidden">
+            <h2 class="text-white text-3xl md:text-4xl font-bold mb-8 drop-shadow-lg">
+                {{ config.messages.question }}
+            </h2>
+            <div class="flex flex-col md:flex-row gap-6 justify-center">
+                <button id="btn-yes" class="btn-response btn-yes">Sí</button>
+                <button id="btn-no" class="btn-response btn-no">No</button>
+            </div>
+        </div>
+
+        <div id="final-message" class="hidden text-center">
+            <p class="text-white text-3xl md:text-4xl font-light tracking-wide">
+                {{ config.messages.success }}
+            </p>
+        </div>
+    </div>
+
+    <a href="/?show=main" class="back-button">← Volver</a>
+
+    <script>
+        // Configuracion
+        const CONFIG = {
+            inhaleTime: 4000,
+            pauseTime: 500,
+            exhaleTime: 4000,
+            cycles: 5,
+            scaleMax: 2.2,
+            scaleMin: 1,
+            fadeTime: 1000,
+            messageTime: 2000
+        };
+
+        // Colores en RGB - Paleta azul/cyan/teal
+        const COLORS = {
+            // Inhalar - azules claros (calma)
+            inhale: [
+                {r: 14, g: 165, b: 233},   // sky-500
+                {r: 56, g: 189, b: 248},   // sky-400
+                {r: 125, g: 211, b: 252},  // sky-300
+                {r: 6, g: 182, b: 212},    // cyan-500
+                {r: 34, g: 211, b: 238},   // cyan-400
+                {r: 103, g: 232, b: 249}   // cyan-300
+            ],
+            // Exhalar - teals/verdes (tranquilidad profunda)
+            exhale: [
+                {r: 103, g: 232, b: 249},  // cyan-300
+                {r: 45, g: 212, b: 191},   // teal-400
+                {r: 20, g: 184, b: 166},   // teal-500
+                {r: 13, g: 148, b: 136},   // teal-600
+                {r: 16, g: 185, b: 129},   // emerald-500
+                {r: 52, g: 211, b: 153}    // emerald-400
+            ]
+        };
+
+        // Utilidades
+        function lerp(a, b, t) {
+            return a + (b - a) * t;
+        }
+
+        function lerpColor(c1, c2, t) {
+            return {
+                r: Math.round(lerp(c1.r, c2.r, t)),
+                g: Math.round(lerp(c1.g, c2.g, t)),
+                b: Math.round(lerp(c1.b, c2.b, t))
+            };
+        }
+
+        function getColorFromArray(arr, progress) {
+            const idx = progress * (arr.length - 1);
+            const lo = Math.floor(idx);
+            const hi = Math.min(lo + 1, arr.length - 1);
+            return lerpColor(arr[lo], arr[hi], idx - lo);
+        }
+
+        function easeInOutCubic(t) {
+            return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        }
+
+        function easeOutCubic(t) {
+            return 1 - Math.pow(1 - t, 3);
+        }
+
+        function easeInCubic(t) {
+            return t * t * t;
+        }
+
+        // Canvas
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        function drawBackground(color) {
+            const w = canvas.width;
+            const h = canvas.height;
+            
+            // Fondo base oscuro azulado
+            ctx.fillStyle = `rgb(${Math.floor(color.r * 0.1)}, ${Math.floor(color.g * 0.15)}, ${Math.floor(color.b * 0.2)})`;
+            ctx.fillRect(0, 0, w, h);
+            
+            // Gradientes animados
+            const time = Date.now() * 0.0004;
+            const points = [
+                {x: 0.2 + Math.sin(time) * 0.08, y: 0.2 + Math.cos(time * 0.8) * 0.08},
+                {x: 0.8 + Math.cos(time * 1.2) * 0.08, y: 0.3 + Math.sin(time) * 0.08},
+                {x: 0.5 + Math.sin(time * 0.7) * 0.1, y: 0.5 + Math.cos(time * 1.1) * 0.1},
+                {x: 0.7 + Math.cos(time * 0.9) * 0.08, y: 0.8 + Math.sin(time * 0.6) * 0.08},
+                {x: 0.3 + Math.sin(time * 1.3) * 0.08, y: 0.7 + Math.cos(time * 0.5) * 0.08}
+            ];
+            
+            points.forEach((p, i) => {
+                const grad = ctx.createRadialGradient(p.x * w, p.y * h, 0, p.x * w, p.y * h, w * 0.5);
+                const alpha = 0.35 + Math.sin(time + i) * 0.1;
+                grad.addColorStop(0, `rgba(${color.r}, ${color.g}, ${color.b}, ${alpha})`);
+                grad.addColorStop(0.4, `rgba(${color.r}, ${color.g}, ${color.b}, ${alpha * 0.4})`);
+                grad.addColorStop(1, 'transparent');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, w, h);
+            });
+        }
+
+        // Elementos
+        const circle = document.getElementById('breathing-circle');
+        const text = document.getElementById('instruction-text');
+        const breathingContainer = document.getElementById('breathing-container');
+        const questionContainer = document.getElementById('question-container');
+        const finalMessage = document.getElementById('final-message');
+
+        // Estado
+        let isRunning = true;
+        let startTime = Date.now();
+        const cycleDuration = CONFIG.inhaleTime + CONFIG.pauseTime + CONFIG.exhaleTime + CONFIG.pauseTime;
+        
+        // Porcentajes de cada fase
+        const inhaleEnd = CONFIG.inhaleTime / cycleDuration;
+        const pause1End = (CONFIG.inhaleTime + CONFIG.pauseTime) / cycleDuration;
+        const exhaleEnd = (CONFIG.inhaleTime + CONFIG.pauseTime + CONFIG.exhaleTime) / cycleDuration;
+
+        // Animacion principal
+        function animate() {
+            if (!isRunning) return;
+
+            const elapsed = (Date.now() - startTime) % cycleDuration;
+            const progress = elapsed / cycleDuration;
+            
+            let phase, phaseProgress, colorArr;
+            
+            if (progress < inhaleEnd) {
+                // Inhalar
+                phase = 'inhale';
+                phaseProgress = progress / inhaleEnd;
+                colorArr = COLORS.inhale;
+            } else if (progress < pause1End) {
+                // Pausa después de inhalar
+                phase = 'pause1';
+                phaseProgress = 1;
+                colorArr = COLORS.inhale;
+            } else if (progress < exhaleEnd) {
+                // Exhalar
+                phase = 'exhale';
+                phaseProgress = (progress - pause1End) / (exhaleEnd - pause1End);
+                colorArr = COLORS.exhale;
+            } else {
+                // Pausa después de exhalar
+                phase = 'pause2';
+                phaseProgress = 1;
+                colorArr = COLORS.exhale;
+            }
+
+            const easedProgress = easeInOutCubic(phaseProgress);
+            const color = getColorFromArray(colorArr, phase === 'pause1' || phase === 'pause2' ? (phase === 'pause1' ? 1 : 1) : easedProgress);
+
+            // Dibujar fondo
+            drawBackground(color);
+
+            // Actualizar circulo
+            let scale;
+            if (phase === 'inhale') {
+                scale = lerp(CONFIG.scaleMin, CONFIG.scaleMax, easeOutCubic(phaseProgress));
+            } else if (phase === 'pause1') {
+                scale = CONFIG.scaleMax;
+            } else if (phase === 'exhale') {
+                scale = lerp(CONFIG.scaleMax, CONFIG.scaleMin, easeInCubic(phaseProgress));
+            } else {
+                scale = CONFIG.scaleMin;
+            }
+
+            circle.style.transform = `scale(${scale})`;
+            
+            const glow = scale / CONFIG.scaleMax;
+            circle.style.background = `linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)) padding-box, linear-gradient(135deg, rgb(${color.r}, ${color.g}, ${color.b}), rgb(${Math.min(255, color.r + 40)}, ${Math.min(255, color.g + 40)}, ${Math.min(255, color.b + 40)})) border-box`;
+            circle.style.boxShadow = `0 0 ${50 * glow}px rgba(${color.r}, ${color.g}, ${color.b}, 0.7), 0 0 ${100 * glow}px rgba(${color.r}, ${color.g}, ${color.b}, 0.5), 0 0 ${150 * glow}px rgba(${color.r}, ${color.g}, ${color.b}, 0.3), inset 0 0 ${50 * glow}px rgba(${color.r}, ${color.g}, ${color.b}, 0.3)`;
+
+            // Actualizar texto
+            if (phase === 'inhale' || phase === 'pause1') {
+                text.textContent = 'Inhala';
+                text.classList.remove('text-fade-blur');
+            } else {
+                text.textContent = 'Exhala';
+                if (phase === 'exhale' && phaseProgress > 0.5) {
+                    text.classList.add('text-fade-blur');
+                } else {
+                    text.classList.remove('text-fade-blur');
+                }
+            }
+
+            // Verificar fin
+            const totalElapsed = Date.now() - startTime;
+            if (totalElapsed >= cycleDuration * CONFIG.cycles) {
+                showQuestion();
+                return;
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        function showQuestion() {
+            isRunning = false;
+            breathingContainer.classList.add('fade-out');
+            
+            setTimeout(() => {
+                breathingContainer.classList.add('hidden');
+                questionContainer.classList.remove('hidden');
+                questionContainer.classList.add('fade-in');
+            }, CONFIG.fadeTime);
+
+            // Seguir animando el fondo
+            animateBackground();
+        }
+
+        function animateBackground() {
+            const color = COLORS.exhale[COLORS.exhale.length - 1];
+            drawBackground(color);
+            requestAnimationFrame(animateBackground);
+        }
+
+        // Eventos de botones
+        document.getElementById('btn-yes').addEventListener('click', () => {
+            questionContainer.classList.add('fade-out');
+            
+            setTimeout(() => {
+                questionContainer.classList.add('hidden');
+                finalMessage.classList.remove('hidden');
+                finalMessage.classList.add('fade-in');
+                
+                setTimeout(() => {
+                    finalMessage.classList.add('fade-out');
+                    setTimeout(() => {
+                        window.location.href = '/?show=main';
+                    }, CONFIG.fadeTime);
+                }, CONFIG.messageTime);
+            }, CONFIG.fadeTime);
+        });
+
+        document.getElementById('btn-no').addEventListener('click', () => {
+            questionContainer.classList.add('fade-out');
+            
+            setTimeout(() => {
+                questionContainer.classList.add('hidden');
+                questionContainer.classList.remove('fade-out', 'fade-in');
+                breathingContainer.classList.remove('hidden', 'fade-out');
+                breathingContainer.classList.add('fade-in');
+                
+                // Reiniciar
+                isRunning = true;
+                startTime = Date.now();
+                animate();
+            }, CONFIG.fadeTime);
+        });
+
+        // Iniciar animación
+        animate();
+    </script>
+</body>
+</html>
