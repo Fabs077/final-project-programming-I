@@ -1,23 +1,69 @@
+<!--
+================================================================================
+index.html - Página Principal del Centro de Bienestar Emocional
+================================================================================
+
+Descripción:
+    Template principal que muestra la pantalla de bienvenida y las tarjetas
+    de selección de emociones. Usa Jinja2 para renderizado dinámico.
+
+Flujo de usuario:
+    1. Pantalla de bienvenida (3 segundos con animación)
+    2. Redirección automática a selección de emociones
+    3. Usuario elige: Ansiedad, Ira o Estrés
+
+Variables Jinja2 (desde app.py):
+    - show_welcome (bool): Controla qué pantalla mostrar
+    - ui (dict): Colores de UI desde parameters.py
+        - ui.theme: bg_primary, bg_secondary, accent
+        - ui.ansiedad/ira/estres: primary, secondary, icon, label
+        - ui.orbs: Configuración de orbs animados del fondo
+
+Tecnologías:
+    - Tailwind CSS (CDN) para utilidades
+    - Google Fonts: Inter (texto) + Playfair Display (títulos)
+    - Canvas API para fondo animado con orbs
+    - CSS Animations para transiciones suaves
+
+Principios DRY aplicados:
+    - Colores centralizados en parameters.py (Single Source of Truth)
+    - Variables CSS para colores del tema
+    - Estructura de tarjetas consistente
+================================================================================
+-->
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Centro de Bienestar Emocional</title>
+    
+    <!-- ========== DEPENDENCIAS EXTERNAS ========== -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- ========== REDIRECCIÓN AUTOMÁTICA ========== -->
+    <!-- Si es pantalla de bienvenida, redirige después de 3 segundos -->
     {% if show_welcome %}
     <meta http-equiv="refresh" content="3;url=/?show=main">
     {% endif %}
+    
     <style>
+        /* ============================================
+           VARIABLES CSS - Colores del tema
+           Valores inyectados desde parameters.py
+           ============================================ */
         :root {
-            --color-bg-primary: #0a0a0f;
-            --color-bg-secondary: #12121a;
-            --color-accent: #a78bfa;
+            --color-bg-primary: {{ ui.theme.bg_primary }};
+            --color-bg-secondary: {{ ui.theme.bg_secondary }};
+            --color-accent: {{ ui.theme.accent }};
         }
 
+        /* ============================================
+           RESET Y BASE
+           ============================================ */
         * {
             margin: 0;
             padding: 0;
@@ -31,7 +77,9 @@
             overflow-x: hidden;
         }
 
-        /* ========== CANVAS BACKGROUND ========== */
+        /* ============================================
+           CANVAS - Fondo animado con orbs
+           ============================================ */
         #bg-canvas {
             position: fixed;
             top: 0;
@@ -41,7 +89,10 @@
             z-index: 0;
         }
 
-        /* ========== WELCOME SCREEN ========== */
+        /* ============================================
+           WELCOME SCREEN - Pantalla de bienvenida
+           Aparece por 3 segundos antes de mostrar contenido
+           ============================================ */
         .welcome-container {
             position: fixed;
             inset: 0;
@@ -101,6 +152,9 @@
         .welcome-dot:nth-child(2) { animation-delay: 0.2s; }
         .welcome-dot:nth-child(3) { animation-delay: 0.4s; }
 
+        /* ============================================
+           KEYFRAMES - Animaciones de bienvenida
+           ============================================ */
         @keyframes welcomeFadeUp {
             to {
                 opacity: 1;
@@ -129,7 +183,9 @@
             100% { opacity: 0; }
         }
 
-        /* ========== MAIN CONTENT ========== */
+        /* ============================================
+           MAIN CONTENT - Contenedor principal
+           ============================================ */
         .main-container {
             position: relative;
             z-index: 10;
@@ -141,7 +197,9 @@
             padding: 2rem;
         }
 
-        /* Header */
+        /* ============================================
+           HEADER - Título y subtítulo
+           ============================================ */
         .header {
             text-align: center;
             margin-bottom: 2.5rem;
@@ -172,7 +230,10 @@
             line-height: 1.5;
         }
 
-        /* Cards Grid */
+        /* ============================================
+           CARDS GRID - Grid de tarjetas de emociones
+           Responsive: 3 columnas en desktop, 1 en móvil
+           ============================================ */
         .cards-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -189,7 +250,10 @@
             }
         }
 
-        /* Emotion Card */
+        /* ============================================
+           EMOTION CARD - Tarjeta individual
+           Incluye: glow, icono, etiqueta, título, descripción
+           ============================================ */
         .emotion-card {
             position: relative;
             border-radius: 20px;
@@ -201,11 +265,15 @@
             aspect-ratio: 4/3;
         }
 
+        /* Animación escalonada para cada tarjeta */
         .emotion-card:nth-child(1) { animation-delay: 0.05s; }
         .emotion-card:nth-child(2) { animation-delay: 0.1s; }
         .emotion-card:nth-child(3) { animation-delay: 0.15s; }
 
-        /* Card Background Glow */
+        /* ============================================
+           CARD GLOW - Efecto de brillo de fondo
+           Colores desde parameters.py (ui.emocion.primary/secondary)
+           ============================================ */
         .card-glow {
             position: absolute;
             inset: -50%;
@@ -219,19 +287,22 @@
             transform: scale(1.1);
         }
 
+        /* Gradientes radiales - Colores inyectados desde parameters.py */
         .glow-ansiedad {
-            background: radial-gradient(circle, #0ea5e9 0%, #14b8a6 50%, transparent 70%);
+            background: radial-gradient(circle, {{ ui.ansiedad.primary }} 0%, {{ ui.ansiedad.secondary }} 50%, transparent 70%);
         }
 
         .glow-ira {
-            background: radial-gradient(circle, #ef4444 0%, #ec4899 50%, transparent 70%);
+            background: radial-gradient(circle, {{ ui.ira.primary }} 0%, {{ ui.ira.secondary }} 50%, transparent 70%);
         }
 
         .glow-estres {
-            background: radial-gradient(circle, #f97316 0%, #a78bfa 50%, transparent 70%);
+            background: radial-gradient(circle, {{ ui.estres.primary }} 0%, {{ ui.estres.secondary }} 50%, transparent 70%);
         }
 
-        /* Card Content */
+        /* ============================================
+           CARD CONTENT - Contenido con glassmorphism
+           ============================================ */
         .card-content {
             position: relative;
             z-index: 2;
@@ -260,7 +331,9 @@
             transform: translateY(-8px);
         }
 
-        /* Card Icon */
+        /* ============================================
+           CARD ICON - Icono con gradiente
+           ============================================ */
         .card-icon {
             width: 48px;
             height: 48px;
@@ -276,19 +349,20 @@
             transform: scale(1.1) rotate(5deg);
         }
 
+        /* Fondos de iconos - Colores con transparencia usando color-mix() */
         .icon-ansiedad {
-            background: linear-gradient(135deg, rgba(14, 165, 233, 0.2), rgba(20, 184, 166, 0.2));
-            border: 1px solid rgba(14, 165, 233, 0.3);
+            background: linear-gradient(135deg, color-mix(in srgb, {{ ui.ansiedad.primary }} 20%, transparent), color-mix(in srgb, {{ ui.ansiedad.secondary }} 20%, transparent));
+            border: 1px solid color-mix(in srgb, {{ ui.ansiedad.primary }} 30%, transparent);
         }
 
         .icon-ira {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(236, 72, 153, 0.2));
-            border: 1px solid rgba(239, 68, 68, 0.3);
+            background: linear-gradient(135deg, color-mix(in srgb, {{ ui.ira.primary }} 20%, transparent), color-mix(in srgb, {{ ui.ira.secondary }} 20%, transparent));
+            border: 1px solid color-mix(in srgb, {{ ui.ira.primary }} 30%, transparent);
         }
 
         .icon-estres {
-            background: linear-gradient(135deg, rgba(249, 115, 34, 0.2), rgba(167, 139, 250, 0.2));
-            border: 1px solid rgba(249, 115, 34, 0.3);
+            background: linear-gradient(135deg, color-mix(in srgb, {{ ui.estres.primary }} 20%, transparent), color-mix(in srgb, {{ ui.estres.secondary }} 20%, transparent));
+            border: 1px solid color-mix(in srgb, {{ ui.estres.primary }} 30%, transparent);
         }
 
         .card-icon svg {
@@ -296,11 +370,14 @@
             height: 24px;
         }
 
-        .icon-ansiedad svg { color: #22d3ee; }
-        .icon-ira svg { color: #f87171; }
-        .icon-estres svg { color: #fb923c; }
+        /* Colores de SVG desde parameters.py */
+        .icon-ansiedad svg { color: {{ ui.ansiedad.icon }}; }
+        .icon-ira svg { color: {{ ui.ira.icon }}; }
+        .icon-estres svg { color: {{ ui.estres.icon }}; }
 
-        /* Card Text */
+        /* ============================================
+           CARD TEXT - Etiqueta, título, descripción
+           ============================================ */
         .card-label {
             font-size: 0.7rem;
             font-weight: 600;
@@ -309,9 +386,10 @@
             margin-bottom: 0.75rem;
         }
 
-        .label-ansiedad { color: #22d3ee; }
-        .label-ira { color: #f87171; }
-        .label-estres { color: #fb923c; }
+        /* Colores de etiquetas desde parameters.py */
+        .label-ansiedad { color: {{ ui.ansiedad.label }}; }
+        .label-ira { color: {{ ui.ira.label }}; }
+        .label-estres { color: {{ ui.estres.label }}; }
 
         .card-title {
             font-family: 'Playfair Display', serif;
@@ -328,6 +406,7 @@
             color: rgba(255,255,255,0.5);
             line-height: 1.5;
             flex-grow: 1;
+            /* Limita a 2 líneas con ellipsis */
             display: -webkit-box;
             -webkit-line-clamp: 2;
             line-clamp: 2;
@@ -335,7 +414,9 @@
             overflow: hidden;
         }
 
-        /* Card Footer */
+        /* ============================================
+           CARD FOOTER - CTA y tiempo estimado
+           ============================================ */
         .card-footer {
             display: flex;
             align-items: center;
@@ -383,7 +464,9 @@
             height: 14px;
         }
 
-        /* Animations */
+        /* ============================================
+           ANIMATIONS - Animación de entrada
+           ============================================ */
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -395,7 +478,9 @@
             }
         }
 
-        /* Footer */
+        /* ============================================
+           FOOTER - Pie de página fijo
+           ============================================ */
         .page-footer {
             position: fixed;
             bottom: 0;
@@ -415,10 +500,17 @@
     </style>
 </head>
 <body>
+    <!-- ========================================
+         CANVAS DE FONDO
+         Renderiza orbs animados con gradientes
+         ======================================== -->
     <canvas id="bg-canvas"></canvas>
 
     {% if show_welcome %}
-    <!-- Welcome Screen -->
+    <!-- ========================================
+         PANTALLA DE BIENVENIDA
+         Se muestra 3 segundos, luego redirige
+         ======================================== -->
     <div class="welcome-container">
         <h1 class="welcome-title">Bienvenido</h1>
         <p class="welcome-subtitle">Centro de Bienestar Emocional</p>
@@ -430,8 +522,12 @@
         </div>
     </div>
     {% else %}
-    <!-- Main Content -->
+    <!-- ========================================
+         CONTENIDO PRINCIPAL
+         Grid de 3 tarjetas de emociones
+         ======================================== -->
     <main class="main-container">
+        <!-- Header con pregunta principal -->
         <header class="header">
             <span class="header-tag">Bienestar emocional</span>
             <h1 class="header-title">¿Cómo te sientes hoy?</h1>
@@ -439,11 +535,15 @@
         </header>
 
         <div class="cards-grid">
-            <!-- Ansiedad Card -->
+            <!-- ================================
+                 TARJETA: ANSIEDAD
+                 Técnica 4-4 | ~45 segundos
+                 ================================ -->
             <a href="/select/ansiedad" class="emotion-card">
                 <div class="card-glow glow-ansiedad"></div>
                 <div class="card-content">
                     <div class="card-icon icon-ansiedad">
+                        <!-- Icono: Reloj -->
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z"/>
                         </svg>
@@ -454,11 +554,13 @@
                     <div class="card-footer">
                         <span class="card-cta">
                             Comenzar
+                            <!-- Icono: Flecha derecha -->
                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
                             </svg>
                         </span>
                         <span class="card-time">
+                            <!-- Icono: Reloj pequeño -->
                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
@@ -468,11 +570,15 @@
                 </div>
             </a>
 
-            <!-- Ira Card -->
+            <!-- ================================
+                 TARJETA: IRA
+                 Técnica 4-7-8 | ~19 segundos
+                 ================================ -->
             <a href="/select/ira" class="emotion-card">
                 <div class="card-glow glow-ira"></div>
                 <div class="card-content">
                     <div class="card-icon icon-ira">
+                        <!-- Icono: Fuego -->
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013-5.8 8.25 8.25 0 013.362 1.414z"/>
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 18a3.75 3.75 0 00.495-7.467 5.99 5.99 0 00-1.925 3.546 5.974 5.974 0 01-2.133-1A3.75 3.75 0 0012 18z"/>
@@ -498,11 +604,15 @@
                 </div>
             </a>
 
-            <!-- Estrés Card -->
+            <!-- ================================
+                 TARJETA: ESTRÉS
+                 Ondas visuales | ~30 segundos
+                 ================================ -->
             <a href="/select/estres" class="emotion-card">
                 <div class="card-glow glow-estres"></div>
                 <div class="card-content">
                     <div class="card-icon icon-estres">
+                        <!-- Icono: Rayo -->
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/>
                         </svg>
@@ -529,16 +639,28 @@
         </div>
     </main>
 
+    <!-- Footer con mensaje motivacional -->
     <footer class="page-footer">
         <p class="footer-text">Respira · Relájate · Recupera el control</p>
     </footer>
     {% endif %}
 
+    <!-- ========================================
+         JAVASCRIPT - Animación de fondo
+         Renderiza orbs con gradientes radiales
+         usando Canvas API + requestAnimationFrame
+         ======================================== -->
     <script>
-        // Canvas Background Animation
+        // ============================================
+        // CONFIGURACIÓN DEL CANVAS
+        // ============================================
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
 
+        /**
+         * Ajusta el canvas al tamaño de la ventana
+         * Se ejecuta al cargar y al redimensionar
+         */
         function resizeCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
@@ -546,29 +668,35 @@
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
 
-        // Gradient orbs
-        const orbs = [
-            { x: 0.2, y: 0.3, r: 0.4, color: [167, 139, 250], speed: 0.0003 },
-            { x: 0.8, y: 0.2, r: 0.35, color: [236, 72, 153], speed: 0.0004 },
-            { x: 0.5, y: 0.7, r: 0.45, color: [14, 165, 233], speed: 0.00035 },
-            { x: 0.7, y: 0.8, r: 0.3, color: [249, 115, 34], speed: 0.00045 }
-        ];
+        // ============================================
+        // DATOS DE ORBS
+        // Configuración importada desde parameters.py
+        // Cada orb tiene: x, y, r (radio), color [R,G,B], speed
+        // ============================================
+        const orbs = {{ ui.orbs | tojson }};
 
+        /**
+         * Loop principal de animación
+         * Dibuja fondo oscuro + orbs animados + ruido visual
+         * Usa requestAnimationFrame para 60fps suaves
+         */
         function drawBackground() {
             const w = canvas.width;
             const h = canvas.height;
             const time = Date.now();
 
-            // Dark base
-            ctx.fillStyle = '#0a0a0f';
+            // Fondo base oscuro (color desde parameters.py)
+            ctx.fillStyle = '{{ ui.theme.bg_primary }}';
             ctx.fillRect(0, 0, w, h);
 
-            // Animated orbs
+            // Dibuja cada orb con movimiento sinusoidal
             orbs.forEach((orb, i) => {
+                // Posición animada con sin/cos para movimiento orgánico
                 const x = (orb.x + Math.sin(time * orb.speed + i) * 0.1) * w;
                 const y = (orb.y + Math.cos(time * orb.speed * 0.8 + i) * 0.1) * h;
                 const r = orb.r * Math.min(w, h);
 
+                // Gradiente radial: centro brillante -> transparente
                 const gradient = ctx.createRadialGradient(x, y, 0, x, y, r);
                 gradient.addColorStop(0, `rgba(${orb.color[0]}, ${orb.color[1]}, ${orb.color[2]}, 0.15)`);
                 gradient.addColorStop(0.5, `rgba(${orb.color[0]}, ${orb.color[1]}, ${orb.color[2]}, 0.05)`);
@@ -578,7 +706,7 @@
                 ctx.fillRect(0, 0, w, h);
             });
 
-            // Noise overlay
+            // Ruido visual sutil (50 puntos aleatorios)
             ctx.fillStyle = 'rgba(255, 255, 255, 0.01)';
             for (let i = 0; i < 50; i++) {
                 const x = Math.random() * w;
@@ -586,9 +714,11 @@
                 ctx.fillRect(x, y, 1, 1);
             }
 
+            // Continuar el loop de animación
             requestAnimationFrame(drawBackground);
         }
 
+        // Iniciar animación
         drawBackground();
     </script>
 </body>

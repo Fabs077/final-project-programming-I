@@ -1,17 +1,67 @@
+/*
+================================================================================
+styles.css - Estilos Compartidos del Centro de Bienestar Emocional
+================================================================================
+
+Descripción:
+    Archivo CSS centralizado que contiene estilos reutilizables para toda la
+    aplicación. Sigue el principio DRY (Don't Repeat Yourself) evitando
+    duplicación de código CSS entre los diferentes templates HTML.
+
+Estructura del archivo:
+    1. RESET Y BASE - Normalización y estilos fundamentales
+    2. ANIMACIONES GLOBALES - Keyframes reutilizables
+    3. WELCOME SCREEN - Estilos de la pantalla de bienvenida (legacy)
+    4. BOTONES DE EMOCIÓN - Tarjetas de selección (legacy)
+    5. EJERCICIOS DE RESPIRACIÓN - Estilos compartidos entre ejercicios
+    6. UTILIDADES - Clases helper (.hidden, .fade-in, etc.)
+
+Archivos que importan este CSS:
+    - ansiedad.html (via <link rel="stylesheet" href="/styles.css">)
+    - ira.html
+    - estres.html
+
+Nota sobre index.html:
+    index.html tiene sus propios estilos inline porque usa variables Jinja2
+    para colores dinámicos desde parameters.py. Los estilos legacy de botones
+    en este archivo se mantienen por compatibilidad.
+
+Convenciones:
+    - BEM-like naming para componentes (.component-element)
+    - Prefijos por contexto (.btn-, .exercise-, etc.)
+    - Variables CSS cuando es posible
+    - Mobile-first con media queries para desktop
+================================================================================
+*/
+
 /* ========================================
    RESET Y ESTILOS BASE
+   ----------------------------------------
+   Normalización cross-browser para
+   consistencia en todos los navegadores
    ======================================== */
 * {
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
+    box-sizing: border-box;  /* Incluye padding/border en el width */
 }
 
-/* Animaciones globales */
+/* ========================================
+   ANIMACIONES GLOBALES (KEYFRAMES)
+   ----------------------------------------
+   Animaciones reutilizables en toda la app
+   Referenciadas con: animation: nombre;
+   ======================================== */
+
+/**
+ * fadeIn - Entrada suave con desplazamiento
+ * Uso: Elementos que aparecen en pantalla
+ * Duración recomendada: 0.5s - 1.5s
+ */
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(20px);  /* Sube desde abajo */
     }
     to {
         opacity: 1;
@@ -19,6 +69,11 @@
     }
 }
 
+/**
+ * pulse - Efecto de latido/respiración
+ * Uso: Indicadores de carga, elementos activos
+ * Duración recomendada: 1s - 2s con infinite
+ */
 @keyframes pulse {
     0%, 100% {
         opacity: 1;
@@ -28,6 +83,11 @@
     }
 }
 
+/**
+ * gradient-shift - Movimiento de gradiente
+ * Uso: Fondos animados, efectos de brillo
+ * Requiere: background-size: 300% 300%
+ */
 @keyframes gradient-shift {
     0% {
         background-position: 0% 50%;
@@ -40,20 +100,33 @@
     }
 }
 
-/* Estilos del mensaje de bienvenida */
+/* ========================================
+   WELCOME SCREEN (Legacy)
+   ----------------------------------------
+   Estilos de la pantalla de bienvenida
+   Nota: Actualmente index.html usa inline styles
+   Se mantiene por compatibilidad
+   ======================================== */
+
+/* Título principal de bienvenida */
 .welcome-text {
     animation: fadeIn 1.5s ease-out;
-    text-shadow: 0 0 30px rgba(167, 139, 250, 0.5);
+    text-shadow: 0 0 30px rgba(167, 139, 250, 0.5);  /* Glow violeta */
 }
 
+/* Subtítulo con delay */
 .welcome-subtext {
     animation: fadeIn 2s ease-out;
     animation-delay: 0.5s;
     opacity: 0;
-    animation-fill-mode: forwards;
+    animation-fill-mode: forwards;  /* Mantiene estado final */
 }
 
-/* Puntos de carga */
+/* ========================================
+   LOADING DOTS - Indicador de carga
+   ----------------------------------------
+   Tres puntos con animación escalonada
+   ======================================== */
 .loading-dots {
     animation: fadeIn 1s ease-out;
     animation-delay: 1s;
@@ -61,14 +134,16 @@
     animation-fill-mode: forwards;
 }
 
+/* Punto individual con gradiente */
 .dot {
     width: 12px;
     height: 12px;
-    background: linear-gradient(135deg, #a78bfa, #ec4899);
+    background: linear-gradient(135deg, #a78bfa, #ec4899);  /* violet -> pink */
     border-radius: 50%;
     animation: pulse 1.5s ease-in-out infinite;
 }
 
+/* Delays escalonados para efecto wave */
 .dot:nth-child(2) {
     animation-delay: 0.3s;
 }
@@ -77,108 +152,145 @@
     animation-delay: 0.6s;
 }
 
-/* Fade in para elementos */
+/* Clase utilitaria de fade in */
 .fade-in {
     animation: fadeIn 1s ease-out forwards;
     opacity: 0;
 }
 
-/* Efectos de blur para cada botón */
+/* ========================================
+   BLUR BACKGROUNDS - Efectos de fondo
+   ----------------------------------------
+   Gradientes animados detrás de los botones
+   de emoción. Crean efecto de "glow" suave.
+   ======================================== */
+
+/* Contenedor base del blur */
 .blur-background {
     position: absolute;
-    inset: 0;
-    filter: blur(40px);
+    inset: 0;                           /* Cubre todo el padre */
+    filter: blur(40px);                 /* Desenfoque fuerte */
     opacity: 0.9;
     transition: all 0.5s ease;
-    background-size: 300% 300%;
+    background-size: 300% 300%;         /* Para animación de gradiente */
     animation: gradient-shift 8s ease infinite;
 }
 
-/* Ansiedad - Azul y Verde */
+/* ========================================
+   GRADIENTES POR EMOCIÓN
+   ----------------------------------------
+   Cada emoción tiene su paleta de colores
+   Colores basados en Tailwind CSS
+   ======================================== */
+
+/**
+ * Ansiedad - Paleta fría (calma)
+ * sky-500 -> cyan-500 -> teal-500 -> emerald-500
+ */
 .ansiedad-blur {
     background: linear-gradient(
         135deg,
-        #0ea5e9,
-        #06b6d4,
-        #14b8a6,
-        #10b981,
-        #0ea5e9
+        #0ea5e9,    /* sky-500 */
+        #06b6d4,    /* cyan-500 */
+        #14b8a6,    /* teal-500 */
+        #10b981,    /* emerald-500 */
+        #0ea5e9     /* Repite para loop suave */
     );
 }
 
-/* Ira - Rojo a Violeta */
+/**
+ * Ira - Paleta cálida a fría (transformación)
+ * red-500 -> orange-500 -> pink-500 -> violet-500
+ */
 .ira-blur {
     background: linear-gradient(
         135deg,
-        #ef4444,
-        #f97316,
-        #ec4899,
-        #a855f7,
-        #8b5cf6,
-        #ef4444
+        #ef4444,    /* red-500 */
+        #f97316,    /* orange-500 */
+        #ec4899,    /* pink-500 */
+        #a855f7,    /* purple-500 */
+        #8b5cf6,    /* violet-500 */
+        #ef4444     /* Repite para loop suave */
     );
 }
 
-/* Estrés - Naranja óxido a Lavanda */
+/**
+ * Estrés - Paleta energética a calmada
+ * orange-500 -> amber-400 -> violet-400
+ */
 .estres-blur {
     background: linear-gradient(
         135deg,
-        #f97316,
-        #fb923c,
-        #fbbf24,
-        #c084fc,
-        #a78bfa,
-        #f97316
+        #f97316,    /* orange-500 */
+        #fb923c,    /* orange-400 */
+        #fbbf24,    /* amber-400 */
+        #c084fc,    /* purple-400 */
+        #a78bfa,    /* violet-400 */
+        #f97316     /* Repite para loop suave */
     );
 }
 
-/* Efectos hover en los botones */
+/* ========================================
+   EMOTION BUTTONS - Botones de selección
+   ----------------------------------------
+   Tarjetas interactivas para elegir emoción
+   Incluyen: blur background, glassmorphism, hover effects
+   ======================================== */
+
+/* Estado hover del blur - se expande y intensifica */
 .emotion-button:hover .blur-background {
     filter: blur(50px);
     opacity: 1;
     transform: scale(1.1);
 }
 
+/* Botón base con glassmorphism */
 .emotion-button {
-    backdrop-filter: blur(10px);
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);                    /* Efecto vidrio */
+    background: rgba(255, 255, 255, 0.05);          /* Fondo semi-transparente */
+    border: 1px solid rgba(255, 255, 255, 0.1);    /* Borde sutil */
 }
 
+/* Hover del botón - más prominente */
 .emotion-button:hover {
     border-color: rgba(255, 255, 255, 0.3);
     box-shadow: 
-        0 20px 50px rgba(0, 0, 0, 0.3),
-        0 0 100px rgba(167, 139, 250, 0.3);
+        0 20px 50px rgba(0, 0, 0, 0.3),             /* Sombra de elevación */
+        0 0 100px rgba(167, 139, 250, 0.3);         /* Glow violeta */
 }
 
-/* Contenido del botón */
+/* Contenido interno del botón */
 .button-content {
     background: rgba(0, 0, 0, 0.2);
     backdrop-filter: blur(20px);
-    border-radius: inherit;
+    border-radius: inherit;                         /* Hereda del padre */
     transition: all 0.3s ease;
 }
 
 .emotion-button:hover .button-content {
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.3);                 /* Más oscuro en hover */
 }
 
-/* Iconos */
+/* ========================================
+   ICONOS - Animaciones de iconos
+   ======================================== */
 .icon-container {
     transition: transform 0.5s ease;
 }
 
+/* Efecto playful en hover */
 .emotion-button:hover .icon-container {
     transform: scale(1.1) rotate(5deg);
 }
 
-/* Animación de tarjetas */
+/* ========================================
+   ANIMACIONES DE TARJETAS
+   ======================================== */
 .button-card {
     animation: fadeIn 1s ease-out forwards;
 }
 
-/* Transiciones suaves */
+/* Curva de transición suave global */
 * {
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -188,25 +300,34 @@
     animation: fadeIn 0.5s ease-out forwards;
 }
 
-/* Scrollbar personalizada */
+/* ========================================
+   SCROLLBAR PERSONALIZADA
+   ----------------------------------------
+   Estilo consistente con el tema oscuro
+   Solo funciona en WebKit (Chrome, Safari, Edge)
+   ======================================== */
 ::-webkit-scrollbar {
     width: 10px;
 }
 
 ::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.2);                /* Track oscuro */
 }
 
 ::-webkit-scrollbar-thumb {
-    background: rgba(167, 139, 250, 0.5);
+    background: rgba(167, 139, 250, 0.5);         /* Thumb violeta */
     border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(167, 139, 250, 0.7);
+    background: rgba(167, 139, 250, 0.7);         /* Más brillante en hover */
 }
 
-/* Efectos de resplandor suave */
+/* ========================================
+   EFECTOS DE RESPLANDOR (GLOW)
+   ----------------------------------------
+   Animación pulsante para botones activos
+   ======================================== */
 @keyframes soft-glow {
     0%, 100% {
         box-shadow: 
@@ -224,23 +345,33 @@
     animation: soft-glow 2s ease-in-out infinite;
 }
 
-/* Responsividad mejorada */
+/* ========================================
+   RESPONSIVE - Adaptación móvil
+   ----------------------------------------
+   Ajustes para pantallas pequeñas
+   ======================================== */
 @media (max-width: 768px) {
     .emotion-button {
-        height: 16rem;
+        height: 16rem;                             /* Más pequeño en móvil */
     }
     
     .blur-background {
-        filter: blur(30px);
+        filter: blur(30px);                        /* Menos blur para rendimiento */
     }
 }
 
 /* ========================================
    ESTILOS COMPARTIDOS - Ejercicios de Respiración
+   ----------------------------------------
    DRY: Usados en ansiedad.html, ira.html, estres.html
+   Estos estilos se cargan via <link> en cada ejercicio
    ======================================== */
 
-/* Canvas de fondo */
+/**
+ * Canvas de fondo
+ * Contenedor para las animaciones Canvas API
+ * z-index: 0 para estar detrás del contenido
+ */
 .exercise-canvas {
     position: fixed;
     top: 0;
@@ -250,7 +381,11 @@
     z-index: 0;
 }
 
-/* Capa de contenido */
+/**
+ * Capa de contenido
+ * Contenedor flex centrado sobre el canvas
+ * z-index: 10 para estar sobre el fondo
+ */
 .content-layer {
     position: relative;
     z-index: 10;
@@ -261,7 +396,14 @@
     min-height: 100vh;
 }
 
-/* Círculo de respiración */
+/* ========================================
+   CÍRCULO DE RESPIRACIÓN
+   ----------------------------------------
+   Elemento visual que guía la respiración
+   Se expande/contrae con CSS transforms
+   ======================================== */
+
+/* Wrapper para posicionamiento */
 .circle-wrapper {
     position: relative;
     display: flex;
@@ -271,33 +413,47 @@
     height: 330px;
 }
 
+/* Círculo animado */
 .breathing-circle {
     width: 150px;
     height: 150px;
     border-radius: 50%;
-    border: 6px solid transparent;
+    border: 6px solid transparent;     /* Se colorea via JS */
     position: absolute;
 }
 
-/* Texto de instrucción */
+/* ========================================
+   TEXTO DE INSTRUCCIÓN
+   ----------------------------------------
+   "Inhala", "Exhala", "Mantén" etc.
+   Se muestra en el centro del círculo
+   ======================================== */
 .instruction-text {
     position: relative;
     z-index: 10;
     text-align: center;
     font-size: 1.5rem;
-    font-weight: 300;
+    font-weight: 300;                  /* Light weight */
     color: white;
-    letter-spacing: 0.2em;
-    text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    letter-spacing: 0.2em;             /* Espaciado amplio */
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);  /* Glow blanco */
     transition: opacity 1s ease-in-out, filter 1s ease-in-out;
 }
 
+/* Estado de transición - fade con blur */
 .text-fade-blur {
     opacity: 0;
     filter: blur(15px);
 }
 
-/* Botones de respuesta */
+/* ========================================
+   BOTONES DE RESPUESTA
+   ----------------------------------------
+   "Sí" y "No" al final de cada ejercicio
+   Glassmorphism con colores semánticos
+   ======================================== */
+
+/* Base de botones de respuesta */
 .btn-response {
     padding: 1rem 3rem;
     border-radius: 1rem;
@@ -305,23 +461,25 @@
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);       /* Efecto vidrio */
     border: 2px solid transparent;
 }
 
+/* Botón "Sí" - Verde (positivo) */
 .btn-yes {
-    background: rgba(34, 197, 94, 0.3);
+    background: rgba(34, 197, 94, 0.3);      /* green-500 con alpha */
     border-color: rgba(34, 197, 94, 0.5);
     color: white;
 }
 
 .btn-yes:hover {
     background: rgba(34, 197, 94, 0.5);
-    transform: scale(1.05);
+    transform: scale(1.05);                   /* Crece ligeramente */
 }
 
+/* Botón "No" - Rojo (repetir ejercicio) */
 .btn-no {
-    background: rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.3);      /* red-500 con alpha */
     border-color: rgba(239, 68, 68, 0.5);
     color: white;
 }
@@ -331,18 +489,23 @@
     transform: scale(1.05);
 }
 
-/* Botón de volver */
+/* ========================================
+   BOTÓN DE VOLVER
+   ----------------------------------------
+   Link fijo en la parte inferior
+   Lleva de vuelta a index.html
+   ======================================== */
 .back-button {
     position: fixed;
-    bottom: 2rem;
+    bottom: 4rem;                      /* Separado de la barra de progreso */
     left: 50%;
-    transform: translateX(-50%);
-    z-index: 100;
+    transform: translateX(-50%);       /* Centrado horizontal */
+    z-index: 100;                      /* Sobre todo el contenido */
     background: rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(10px);
     color: white;
     padding: 0.75rem 2rem;
-    border-radius: 9999px;
+    border-radius: 9999px;             /* Pill shape */
     border: 1px solid rgba(255, 255, 255, 0.3);
     text-decoration: none;
     transition: all 0.3s ease;
@@ -353,13 +516,23 @@
     transform: translateX(-50%) scale(1.05);
 }
 
-/* Utilidades */
-.hidden { display: none !important; }
+/* ========================================
+   UTILIDADES
+   ----------------------------------------
+   Clases helper para uso en JavaScript
+   ======================================== */
 
+/* Ocultar elementos completamente */
+.hidden { 
+    display: none !important; 
+}
+
+/* Animación de entrada */
 .fade-in { 
     animation: fadeIn 1s ease-in forwards; 
 }
 
+/* Animación de salida */
 .fade-out { 
     animation: fadeOut 1s ease-out forwards; 
 }
@@ -369,7 +542,12 @@
     to { opacity: 0; }
 }
 
-/* Shake para ira */
+/* ========================================
+   SHAKE - Efecto de temblor para Ira
+   ----------------------------------------
+   Se aplica durante la fase de retención
+   Simboliza la energía contenida
+   ======================================== */
 @keyframes shake {
     0%, 100% { margin-left: 0; }
     20% { margin-left: -4px; }
